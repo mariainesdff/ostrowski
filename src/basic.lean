@@ -51,7 +51,6 @@ lemma equiv_trans {R : Type*} [ring R] (f g k : ring_norm R) (hfg : equiv f g) (
 begin
   rcases hfg with ⟨c, hfg1, hfg2⟩,
   rcases hgk with ⟨d, hgk1, hgk2⟩,
-  unfold equiv,
   refine ⟨c * d, by simp only [hfg1, hgk1, zero_lt_mul_right], _⟩,
   rw ← hgk2,
   rw ← hfg2,
