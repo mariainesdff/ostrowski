@@ -20,7 +20,7 @@ def is_nonarchimedean {α : Type*} [has_add α] {β : Type*} [linear_order β] (
 /-- A function `f : α → β` is `multiplicative` if it satisfies the equality
   `f (a * b) = (f a) * (f b)` for all `a, b ∈ α`. -/
 def mul_eq {α : Type*} [has_mul α] {β : Type*} [has_mul β] [has_le β] (f : α → β) : Prop :=
-∀ r s, f (r * s) ≤ (f r) * (f s)
+∀ r s, f (r * s) = (f r) * (f s)
 
 namespace ring_norm
 
