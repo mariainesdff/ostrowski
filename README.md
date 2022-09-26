@@ -7,7 +7,11 @@ London from September 26th to September 30th, 2022.
 
 **Project Leader:** María Inés de Frutos-Fernández
 
-**Project Members:** coming soon.
+**Project Members:** 
+* Alistair Bill
+* Billy Miao
+* Michał Mrugała
+* Jan Ot Piña
 
 ## Installation instructions
 The formalization has been developed over Lean 3 and its matemathical library mathlib. For detailed instructions to install Lean, mathlib, and
