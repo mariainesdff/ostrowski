@@ -23,11 +23,12 @@ section real
 /-- The usual absolute value on ℚ. -/
 def ring_norm.real : ring_norm ℚ :=
 { to_fun    := λ x : ℚ, |x|,
-  map_zero' := sorry,
-  add_le'   := sorry,
-  neg'      := sorry,
-  eq_zero_of_map_eq_zero' := sorry,
-  mul_le'   := sorry }
+  map_zero' := by simp,
+  add_le'   := norm_add_le,
+  neg'      := by simp,
+  eq_zero_of_map_eq_zero' := by simp,
+  mul_le'   := by simp [abs_mul],
+  }
 
 lemma ring_norm.real_mul_eq : mul_eq ring_norm.real :=
 sorry
@@ -56,6 +57,22 @@ sorry
 
 end padic
 
+variables (f : ring_norm ℚ)
+
+lemma norm_one_eq_one (h : mul_eq f) : f 1 = 1 := sorry
+-- this isn't true if f = 0
+-- use seminorm_one_eq_one_iff_ne_zero instead
+
+lemma nat_norm_leq_one (n : ℕ) (heq : mul_eq f) (harc : is_nonarchimedean f) : f n ≤ 1 :=
+begin
+  induction n with c hc,
+  simp,
+  rw nat.succ_eq_add_one,
+  specialize harc c 1,
+  rw norm_one_eq_one _ heq at harc,
+  simp,
+  exact le_trans harc (max_le hc rfl.ge)
+end
 
 /-- Ostrowski's Theorem -/
 theorem rat_ring_norm_p_adic_or_real (f : ring_norm ℚ) (hf_nontriv : f ≠ 1) (hf_mul : mul_eq f) :
