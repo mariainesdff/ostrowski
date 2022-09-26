@@ -31,25 +31,37 @@ def equiv {R : Type*} [ring R] (f : ring_norm R) (g : ring_norm R) :=
 
 -- TODO: check that `equiv` is an equivalence relation.
 lemma equiv_refl {R : Type*} [ring R] (f : ring_norm R) :
-  equiv f f :=
-begin
-  sorry
-end
+  equiv f f := by refine ⟨1, by linarith, by simp only [real.rpow_one]⟩
 
 lemma equiv_symm {R : Type*} [ring R] (f g : ring_norm R) (hfg : equiv f g) :
   equiv g f :=
 begin
-  sorry
+  rcases hfg with ⟨c, hfg1, hfg2⟩,
+  refine ⟨1 / c, by simp only [hfg1, one_div, inv_pos], _⟩,
+  rw ← hfg2,
+  ext,
+  simp only [one_div],
+  have h1 : c ≠ 0 := by linarith,
+  rw ← real.rpow_mul (map_nonneg f x),
+  simp only [h1, mul_inv_cancel, ne.def, not_false_iff, real.rpow_one],
 end
 
 lemma equiv_trans {R : Type*} [ring R] (f g k : ring_norm R) (hfg : equiv f g) (hgk : equiv g k) :
   equiv f k :=
 begin
-  sorry
+  rcases hfg with ⟨c, hfg1, hfg2⟩,
+  rcases hgk with ⟨d, hgk1, hgk2⟩,
+  unfold equiv,
+  refine ⟨c * d, by simp only [hfg1, hgk1, zero_lt_mul_right], _⟩,
+  rw ← hgk2,
+  rw ← hfg2,
+  ext,
+  exact real.rpow_mul (map_nonneg f x) c d,
 end
 
 end ring_norm
 
 /- QUESTIONS :
   * What properties of `ring_norm` did you need to prove these lemmas?
+  Nonneg
   * How far can `equiv` be generalized? -/
