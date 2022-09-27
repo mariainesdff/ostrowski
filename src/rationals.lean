@@ -66,7 +66,7 @@ end
 
 end padic
 
-variables (f : ring_norm ℚ)
+variables {f : ring_norm ℚ}
 
 lemma norm_one_eq_one (h : mul_eq f) : f 1 = 1 := 
 begin
@@ -82,12 +82,8 @@ begin
     ... = (f 1) * (f 1)⁻¹ : by rw H₁
     ... = 1 : by field_simp,
 end
--- this isn't true if f = 0
--- use seminorm_one_eq_one_iff_ne_zero instead
 
 section non_archimedean
-
-variables (f : ring_norm ℚ)
 
 lemma nat_norm_leq_one (n : ℕ) (heq : mul_eq f) (harc : is_nonarchimedean f) : f n ≤ 1 :=
 begin
@@ -95,7 +91,7 @@ begin
   { simp only [nat.cast_zero, map_zero, zero_le_one], },
   { rw nat.succ_eq_add_one,
     specialize harc c 1,
-    rw norm_one_eq_one _ heq at harc,
+    rw norm_one_eq_one heq at harc,
     simp only [nat.cast_add, nat.cast_one],
     exact le_trans harc (max_le hc rfl.ge), },
 end
@@ -108,9 +104,20 @@ end
 -- Get s
 -- Finish
 
-lemma nat_nontriv_of_rat_nontriv (hf_mul : mul_eq f) : f ≠ 1 → (∃ n : ℕ, f n < 1) := sorry
-
-
+lemma nat_nontriv_of_rat_nontriv (hf_mul : mul_eq f) (harc : is_nonarchimedean f) : f ≠ 1 → (∃ n : ℕ, n ≠ 0 ∧ f n < 1) := 
+begin
+  contrapose!,
+  intro hfnge1,
+  have hfnateq1 : ∀ n : ℕ, n ≠ 0 → f n = 1,
+  { intros n hnneq0,
+    specialize hfnge1 n hnneq0,
+    have := nat_norm_leq_one n hf_mul harc,
+    linarith },
+  ext,
+  by_cases h : x = 0,
+  { simp [h] },
+  { sorry }
+end
 
 end non_archimedean
 
