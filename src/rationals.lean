@@ -66,7 +66,7 @@ end
 
 end padic
 
-variables (f : ring_norm ℚ)
+variables {f : ring_norm ℚ}
 
 lemma norm_one_eq_one (h : mul_eq f) : f 1 = 1 := 
 begin
@@ -91,7 +91,7 @@ begin
   { simp only [nat.cast_zero, map_zero, zero_le_one], },
   { rw nat.succ_eq_add_one,
     specialize harc c 1,
-    rw norm_one_eq_one _ heq at harc,
+    rw norm_one_eq_one heq at harc,
     simp only [nat.cast_add, nat.cast_one],
     exact le_trans harc (max_le hc rfl.ge), },
 end
@@ -101,11 +101,32 @@ sorry
 -- Proof strategy:
 
 -- Prove nontrivial on ℚ implies nontrivial on ℕ
-lemma nat_nontriv_of_rat_nontriv (hf_mul : mul_eq f) : f ≠ 1 → (∃ n : ℕ, f n < 1) := sorry
-
+lemma nat_nontriv_of_rat_nontriv (hf_mul : mul_eq f) (harc : is_nonarchimedean f) : f ≠ 1 → (∃ n : ℕ, n ≠ 0 ∧ f n < 1) := 
+begin
+  contrapose!,
+  intro hfnge1,
+  have hfnateq1 : ∀ n : ℕ, n ≠ 0 → f n = 1,
+  { intros n hnneq0,
+    specialize hfnge1 n hnneq0,
+    have := nat_norm_leq_one n hf_mul harc,
+    linarith },
+  ext,
+  by_cases h : x = 0,
+  { simp [h] },
+  { sorry }
+end
 -- Show that there is a prime with norm < 1
-lemma ex_prime_norm_lt_one (heq : mul_eq f) (harc : is_nonarchimedean f) : 
-  ∃ (p : ℕ) [hp : fact (nat.prime p)], f p < 1 := sorry
+lemma ex_prime_norm_lt_one (heq : mul_eq f) (harc : is_nonarchimedean f) 
+  (h : f ≠ 1) : ∃ (p : ℕ) [hp : fact (nat.prime p)], f p < 1 :=
+begin
+  by_contra',
+  obtain ⟨n, hn1, hn2⟩ := nat_nontriv_of_rat_nontriv heq harc h,
+  let t := nat.factors n,
+  rw ← nat.prod_factors hn1 at hn2,
+  have exp : ∀ q : ℕ, q ∈ nat.factors n → 1 ≤ f q,
+  {sorry},
+  sorry
+end
 
 -- Show that I is an ideal
 def I (harc : is_nonarchimedean f) (heq : mul_eq f) : ideal ℤ := 
@@ -132,6 +153,8 @@ def I (harc : is_nonarchimedean f) (heq : mul_eq f) : ideal ℤ :=
 -- Show that it's equal to pℤ
 -- Get s
 -- Finish
+
+
 
 end non_archimedean
 
