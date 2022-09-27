@@ -114,8 +114,8 @@ begin
   { sorry }
 end
 -- Show that there is a prime with norm < 1
-lemma ex_prime_norm_lt_one (heq : mul_eq f) (harc : is_nonarchimedean f) : 
-  ∃ (p : ℕ) [hp : fact (nat.prime p)], f p < 1 := sorry
+lemma ex_prime_norm_lt_one (heq : mul_eq f) (harc : is_nonarchimedean f) 
+  (h : f ≠ 1) : ∃ (p : ℕ) [hp : fact (nat.prime p)], f p < 1 := sorry
 
 -- Show that P is an ideal
 -- Show that it's equal to pℤ
