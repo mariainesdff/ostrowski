@@ -97,16 +97,18 @@ begin
 end
 
 -- Proof strategy:
+
 -- Prove nontrivial on ℚ implies nontrivial on ℕ
+lemma nat_nontriv_of_rat_nontriv (hf_mul : mul_eq f) : f ≠ 1 → (∃ n : ℕ, f n < 1) := sorry
+
 -- Show that there is a prime with norm < 1
+lemma ex_prime_norm_lt_one (heq : mul_eq f) (harc : is_nonarchimedean f) : 
+  ∃ (p : ℕ) [hp : fact (nat.prime p)], f p < 1 := sorry
+
 -- Show that P is an ideal
 -- Show that it's equal to pℤ
 -- Get s
 -- Finish
-
-lemma nat_nontriv_of_rat_nontriv (hf_mul : mul_eq f) : f ≠ 1 → (∃ n : ℕ, f n < 1) := sorry
-
-
 
 end non_archimedean
 
