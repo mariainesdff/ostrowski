@@ -96,6 +96,8 @@ begin
     exact le_trans harc (max_le hc rfl.ge), },
 end
 
+lemma int_norm_le_one (n : ℤ) (heq : mul_eq f) (harc : is_nonarchimedean f) : f n ≤ 1 :=
+sorry
 -- Proof strategy:
 
 -- Prove nontrivial on ℚ implies nontrivial on ℕ
@@ -105,7 +107,28 @@ lemma nat_nontriv_of_rat_nontriv (hf_mul : mul_eq f) : f ≠ 1 → (∃ n : ℕ,
 lemma ex_prime_norm_lt_one (heq : mul_eq f) (harc : is_nonarchimedean f) : 
   ∃ (p : ℕ) [hp : fact (nat.prime p)], f p < 1 := sorry
 
--- Show that P is an ideal
+-- Show that I is an ideal
+def I (harc : is_nonarchimedean f) (heq : mul_eq f) : ideal ℤ := 
+{ carrier := {a : ℤ | f a < 1},
+  add_mem' := begin
+     intros a b ha hb,
+     simp,
+     have : max (f a) (f b) < 1 := max_lt ha hb,
+     linarith [harc a b]
+  end,
+  zero_mem' := begin
+    change f 0 < 1,
+    rw [map_zero f],
+    exact zero_lt_one,
+  end,
+  smul_mem' := begin
+    intros a b hb,
+    change f (↑(a * b)) < 1,
+    simp,
+    rw heq,
+    exact mul_lt_of_le_of_lt_one' (int_norm_le_one _ _ heq harc) hb (map_nonneg f b) zero_lt_one,
+  end }
+
 -- Show that it's equal to pℤ
 -- Get s
 -- Finish
