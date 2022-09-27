@@ -147,7 +147,7 @@ def I (harc : is_nonarchimedean f) (heq : mul_eq f) : ideal ℤ :=
     change f (↑(a * b)) < 1,
     simp,
     rw heq,
-    exact mul_lt_of_le_of_lt_one' (int_norm_le_one _ _ heq harc) hb (map_nonneg f b) zero_lt_one,
+    exact mul_lt_of_le_of_lt_one' (int_norm_le_one a heq harc) hb (map_nonneg f b) zero_lt_one,
   end }
 
 -- Show that it's equal to pℤ
