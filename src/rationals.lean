@@ -42,15 +42,27 @@ section padic
 /-- The p-adic norm on ℚ. -/
 def ring_norm.padic (p : ℕ) [hp : fact (nat.prime p)] : ring_norm ℚ :=
 { to_fun    := λ x : ℚ, (padic_norm p x: ℝ),
-  map_zero' := sorry,
-  add_le'   := sorry,
-  neg'      := sorry,
-  eq_zero_of_map_eq_zero' := sorry,
-  mul_le'   := sorry }
+  map_zero' := by simp only [padic_norm.zero, rat.cast_zero],
+  add_le'   :=
+  begin
+    norm_cast,
+    exact padic_norm.triangle_ineq,
+  end,
+  neg'      := by simp only [padic_norm.neg, eq_self_iff_true, forall_const],
+  eq_zero_of_map_eq_zero' := 
+  begin
+    norm_cast,
+    exact @padic_norm.zero_of_padic_norm_eq_zero p _,
+  end,
+  mul_le'   := by simp only [padic_norm.mul, le_refl, forall_const, rat.cast_mul], }
+
+@[simp] lemma ring_norm_eq_padic_norm (p : ℕ) [hp : fact (nat.prime p)] (r : ℚ) :
+  ring_norm.padic p r = padic_norm p r := rfl
 
 lemma ring_norm.padic_mul_eq (p : ℕ) [hp : fact (nat.prime p)] :
   mul_eq (@ring_norm.padic p hp) :=
-sorry
+by simp only [mul_eq_def, ring_norm_eq_padic_norm, padic_norm.mul, rat.cast_mul,
+  eq_self_iff_true, forall_const],
 
 lemma ring_norm.padic_is_nonarchimedean (p : ℕ) [hp : fact (nat.prime p)] :
   is_nonarchimedean (@ring_norm.padic p hp) :=
@@ -67,12 +79,12 @@ lemma norm_one_eq_one (h : mul_eq f) : f 1 = 1 := sorry
 lemma nat_norm_leq_one (n : ℕ) (heq : mul_eq f) (harc : is_nonarchimedean f) : f n ≤ 1 :=
 begin
   induction n with c hc,
-  simp,
-  rw nat.succ_eq_add_one,
-  specialize harc c 1,
-  rw norm_one_eq_one _ heq at harc,
-  simp,
-  exact le_trans harc (max_le hc rfl.ge)
+  { simp only [nat.cast_zero, map_zero, zero_le_one], },
+  { rw nat.succ_eq_add_one,
+    specialize harc c 1,
+    rw norm_one_eq_one _ heq at harc,
+    simp only [nat.cast_add, nat.cast_one],
+    exact le_trans harc (max_le hc rfl.ge), },
 end
 
 /-- Ostrowski's Theorem -/
