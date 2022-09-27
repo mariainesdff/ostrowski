@@ -17,6 +17,9 @@ ring_norm, equivalent
 def is_nonarchimedean {α : Type*} [has_add α] {β : Type*} [linear_order β] (f : α → β) : Prop :=
 ∀ r s, f (r + s) ≤ max (f r) (f s)
 
+lemma is_nonarchimedean_def {α : Type*} [has_add α] {β : Type*} [linear_order β] (f : α → β) :
+is_nonarchimedean f ↔ ∀ r s, f (r + s) ≤ max (f r) (f s) := iff.rfl
+
 /-- A function `f : α → β` is `multiplicative` if it satisfies the equality
   `f (a * b) = (f a) * (f b)` for all `a, b ∈ α`. -/
 def mul_eq {α : Type*} [has_mul α] {β : Type*} [has_mul β] [has_le β] (f : α → β) : Prop :=

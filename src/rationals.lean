@@ -62,11 +62,15 @@ def ring_norm.padic (p : ℕ) [hp : fact (nat.prime p)] : ring_norm ℚ :=
 lemma ring_norm.padic_mul_eq (p : ℕ) [hp : fact (nat.prime p)] :
   mul_eq (@ring_norm.padic p hp) :=
 by simp only [mul_eq_def, ring_norm_eq_padic_norm, padic_norm.mul, rat.cast_mul,
-  eq_self_iff_true, forall_const],
+  eq_self_iff_true, forall_const]
 
 lemma ring_norm.padic_is_nonarchimedean (p : ℕ) [hp : fact (nat.prime p)] :
   is_nonarchimedean (@ring_norm.padic p hp) :=
-sorry
+begin
+  simp only [is_nonarchimedean_def, ring_norm_eq_padic_norm],
+  norm_cast,
+  exact @padic_norm.nonarchimedean p _,
+end
 
 end padic
 
