@@ -43,17 +43,9 @@ section padic
 def ring_norm.padic (p : ℕ) [hp : fact (nat.prime p)] : ring_norm ℚ :=
 { to_fun    := λ x : ℚ, (padic_norm p x: ℝ),
   map_zero' := by simp only [padic_norm.zero, rat.cast_zero],
-  add_le'   :=
-  begin
-    norm_cast,
-    exact padic_norm.triangle_ineq,
-  end,
+  add_le'   := by norm_cast; exact padic_norm.triangle_ineq,
   neg'      := by simp only [padic_norm.neg, eq_self_iff_true, forall_const],
-  eq_zero_of_map_eq_zero' := 
-  begin
-    norm_cast,
-    exact @padic_norm.zero_of_padic_norm_eq_zero p _,
-  end,
+  eq_zero_of_map_eq_zero' := by norm_cast; exact @padic_norm.zero_of_padic_norm_eq_zero p _,
   mul_le'   := by simp only [padic_norm.mul, le_refl, forall_const, rat.cast_mul], }
 
 @[simp] lemma ring_norm_eq_padic_norm (p : ℕ) [hp : fact (nat.prime p)] (r : ℚ) :
