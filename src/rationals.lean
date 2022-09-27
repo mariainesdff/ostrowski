@@ -115,7 +115,16 @@ begin
 end
 -- Show that there is a prime with norm < 1
 lemma ex_prime_norm_lt_one (heq : mul_eq f) (harc : is_nonarchimedean f) 
-  (h : f ≠ 1) : ∃ (p : ℕ) [hp : fact (nat.prime p)], f p < 1 := sorry
+  (h : f ≠ 1) : ∃ (p : ℕ) [hp : fact (nat.prime p)], f p < 1 :=
+begin
+  by_contra',
+  obtain ⟨n, hn1, hn2⟩ := nat_nontriv_of_rat_nontriv heq harc h,
+  let t := nat.factors n,
+  rw ← nat.prod_factors hn1 at hn2,
+  have exp : ∀ q : ℕ, q ∈ nat.factors n → 1 ≤ f q,
+  {sorry},
+  sorry
+end
 
 -- Show that P is an ideal
 -- Show that it's equal to pℤ
