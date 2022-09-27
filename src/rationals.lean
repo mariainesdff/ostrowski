@@ -30,8 +30,11 @@ def ring_norm.real : ring_norm ℚ :=
   mul_le'   := by simp [abs_mul],
   }
 
-lemma ring_norm.real_mul_eq : mul_eq ring_norm.real :=
-sorry
+lemma ring_norm.real_mul_eq : mul_eq ring_norm.real := 
+begin
+  intros r s,
+  sorry
+end
 
 end real
 
@@ -41,15 +44,32 @@ section padic
 /-- The p-adic norm on ℚ. -/
 def ring_norm.padic (p : ℕ) [hp : fact (nat.prime p)] : ring_norm ℚ :=
 { to_fun    := λ x : ℚ, (padic_norm p x: ℝ),
-  map_zero' := sorry,
-  add_le'   := sorry,
-  neg'      := sorry,
-  eq_zero_of_map_eq_zero' := sorry,
-  mul_le'   := sorry }
+  map_zero' := by simp,
+  add_le'   := 
+    begin
+      norm_cast,
+      exact padic_norm.triangle_ineq,
+    end,
+  neg'      := by simp,
+  eq_zero_of_map_eq_zero' := 
+    begin
+      norm_cast,
+      intros x hx,
+      exact padic_norm.zero_of_padic_norm_eq_zero hx,
+    end,
+  mul_le'   := 
+    begin
+      norm_cast,
+      intros x y,
+      rw padic_norm.mul,
+    end }
 
 lemma ring_norm.padic_mul_eq (p : ℕ) [hp : fact (nat.prime p)] :
   mul_eq (@ring_norm.padic p hp) :=
-sorry
+begin
+  intros r s,
+  sorry
+end
 
 lemma ring_norm.padic_is_nonarchimedean (p : ℕ) [hp : fact (nat.prime p)] :
   is_nonarchimedean (@ring_norm.padic p hp) :=
@@ -59,7 +79,17 @@ end padic
 
 variables (f : ring_norm ℚ)
 
-lemma norm_one_eq_one (h : mul_eq f) : f 1 = 1 := sorry
+lemma norm_one_eq_one (h : mul_eq f) : f 1 = 1 := 
+begin
+  have H₁ : (f 1)*(f 1) = f 1,
+  calc
+    (f 1)*(f 1) = f (1 * 1) : by rw ←h 1 1
+    ... = f 1 : by norm_num,
+  have H₂ : f 1 ≠ 0,
+  { intro f10,
+    have : (1 : ℚ) = 0 := f.eq_zero_of_map_eq_zero' 1 f10,
+    linarith }
+end
 -- this isn't true if f = 0
 -- use seminorm_one_eq_one_iff_ne_zero instead
 
