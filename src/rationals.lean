@@ -85,21 +85,19 @@ end
 
 lemma norm_neg_one_eq_one (h : mul_eq f) : f (-1) = 1 :=
 begin
-  have H₁ : (f (-1))*(f (-1)) = 1,
+  have H₁ : f (-1) * f (-1) = 1,
   calc
-    (f (-1))*(f (-1)) = f ((-1) * (-1)) : by rw ←h (-1) (-1)
+    f (-1) * f (-1)  = f ((-1) * (-1)) : by rw ←h (-1) (-1)
     ... = f 1 : by norm_num
     ... = 1 : norm_one_eq_one h,
   have H₂: f (-1) ≥ 0 := map_nonneg f (-1),
   rw mul_self_eq_one_iff at H₁,
   cases H₁,
   { exact H₁ },
-  { exfalso,
-    rw H₁ at H₂,
+  { rw H₁ at H₂,
     have h' : ¬(-1 ≥ (0 : ℝ)) := by norm_num,
-    apply h',
-    exact H₂,
-   },
+    contradiction },
+end
 
 --TODO: generalise to division rings, get rid of field_simp
 lemma ring_norm.div_eq (h : mul_eq f) (p : ℚ) {q : ℚ} (hq : q ≠ 0) : f (p / q) = (f p) / (f q) :=
