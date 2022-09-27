@@ -83,7 +83,10 @@ begin
   have H₂ : f 1 ≠ 0,
   { intro f10,
     have : (1 : ℚ) = 0 := f.eq_zero_of_map_eq_zero' 1 f10,
-    linarith }
+    linarith },
+    calc f 1 = (f 1) * (f 1) * (f 1)⁻¹ : by field_simp
+    ... = (f 1) * (f 1)⁻¹ : by rw H₁
+    ... = 1 : by field_simp,
 end
 -- this isn't true if f = 0
 -- use seminorm_one_eq_one_iff_ne_zero instead
