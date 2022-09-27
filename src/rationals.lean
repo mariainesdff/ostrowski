@@ -108,6 +108,8 @@ begin
     exact le_trans harc (max_le hc rfl.ge), },
 end
 
+lemma int_norm_le_one (n : ℤ) (heq : mul_eq f) (harc : is_nonarchimedean f) : f n ≤ 1 :=
+sorry
 -- Proof strategy:
 
 -- Prove nontrivial on ℚ implies nontrivial on ℕ
@@ -167,11 +169,50 @@ begin
     rw [H₁, H₂],
     norm_num }
 end
--- Show that there is a prime with norm < 1
-lemma ex_prime_norm_lt_one (heq : mul_eq f) (harc : is_nonarchimedean f) : 
-  ∃ (p : ℕ) [hp : fact (nat.prime p)], f p < 1 := sorry
 
--- Show that P is an ideal
+def ring_norm.to_monoid_hom (f : ring_norm ℚ) (hf : mul_eq f) : monoid_hom ℚ ℝ :=
+{ to_fun   := f,
+  map_one' := sorry,
+  map_mul' := sorry }
+
+-- Show that there is a prime with norm < 1
+lemma ex_prime_norm_lt_one (heq : mul_eq f) (harc : is_nonarchimedean f) 
+  (h : f ≠ 1) : ∃ (p : ℕ) [hp : fact (nat.prime p)], f p < 1 :=
+begin
+  by_contra',
+  obtain ⟨n, hn1, hn2⟩ := nat_nontriv_of_rat_nontriv heq harc h,
+  let t := nat.factors n,
+  rw ← nat.prod_factors hn1 at hn2,
+  have exp : ∀ q : ℕ, q ∈ nat.factors n → 1 ≤ f q,
+  { sorry },
+  simp only [nat.cast_list_prod] at hn2,
+  have hf_mh: f.to_fun = (f.to_monoid_hom heq).to_fun := rfl,
+  rw [← f.to_fun_eq_coe, hf_mh, (f.to_monoid_hom heq).to_fun_eq_coe, map_list_prod] at hn2,
+  sorry
+end
+
+-- Show that I is an ideal
+def I (harc : is_nonarchimedean f) (heq : mul_eq f) : ideal ℤ := 
+{ carrier := {a : ℤ | f a < 1},
+  add_mem' := begin
+     intros a b ha hb,
+     simp,
+     have : max (f a) (f b) < 1 := max_lt ha hb,
+     linarith [harc a b]
+  end,
+  zero_mem' := begin
+    change f 0 < 1,
+    rw [map_zero f],
+    exact zero_lt_one,
+  end,
+  smul_mem' := begin
+    intros a b hb,
+    change f (↑(a * b)) < 1,
+    simp,
+    rw heq,
+    exact mul_lt_of_le_of_lt_one' (int_norm_le_one a heq harc) hb (map_nonneg f b) zero_lt_one,
+  end }
+
 -- Show that it's equal to pℤ
 -- Get s
 -- Finish
