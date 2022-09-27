@@ -82,12 +82,8 @@ begin
     ... = (f 1) * (f 1)⁻¹ : by rw H₁
     ... = 1 : by field_simp,
 end
--- this isn't true if f = 0
--- use seminorm_one_eq_one_iff_ne_zero instead
 
 section non_archimedean
-
-variables (f : ring_norm ℚ)
 
 lemma nat_norm_leq_one (n : ℕ) (heq : mul_eq f) (harc : is_nonarchimedean f) : f n ≤ 1 :=
 begin
