@@ -118,8 +118,8 @@ end
 
 def ring_norm.to_monoid_hom (f : ring_norm ℚ) (hf : mul_eq f) : monoid_hom ℚ ℝ :=
 { to_fun   := f,
-  map_one' := sorry,
-  map_mul' := sorry }
+  map_one' := norm_one_eq_one hf,
+  map_mul' := hf }
 
 -- Show that there is a prime with norm < 1
 lemma ex_prime_norm_lt_one (heq : mul_eq f) (harc : is_nonarchimedean f) 
@@ -134,6 +134,7 @@ begin
   simp only [nat.cast_list_prod] at hn2,
   have hf_mh: f.to_fun = (f.to_monoid_hom heq).to_fun := rfl,
   rw [← f.to_fun_eq_coe, hf_mh, (f.to_monoid_hom heq).to_fun_eq_coe, map_list_prod] at hn2,
+  
   sorry
 end
 
