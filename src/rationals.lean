@@ -83,6 +83,25 @@ begin
     ... = 1 : by field_simp,
 end
 
+lemma norm_neg_one_eq_one (h : mul_eq f) : f (-1) = 1 :=
+begin
+  have H₁ : (f (-1))*(f (-1)) = 1,
+  calc
+    (f (-1))*(f (-1)) = f ((-1) * (-1)) : by rw ←h (-1) (-1)
+    ... = f 1 : by norm_num
+    ... = 1 : norm_one_eq_one h,
+  have H₂: f (-1) ≥ 0 := map_nonneg f (-1),
+  rw mul_self_eq_one_iff at H₁,
+  cases H₁,
+  { exact H₁ },
+  { exfalso,
+    rw H₁ at H₂,
+    have h' : ¬(-1 ≥ (0 : ℝ)) := by norm_num,
+    apply h',
+    exact H₂,
+   },
+end
+
 section non_archimedean
 
 lemma nat_norm_leq_one (n : ℕ) (heq : mul_eq f) (harc : is_nonarchimedean f) : f n ≤ 1 :=
@@ -97,7 +116,18 @@ begin
 end
 
 lemma int_norm_le_one (n : ℤ) (heq : mul_eq f) (harc : is_nonarchimedean f) : f n ≤ 1 :=
-sorry
+begin
+  cases int.eq_coe_or_neg n,
+  cases h,
+  { rw h,
+  exact nat_norm_leq_one w heq harc },
+  { 
+    rw neg_eq_neg_one_mul at h,
+    rw h,
+    sorry,
+    -- use heq and norm_neg_one_eq_one 
+  },
+end
 -- Proof strategy:
 
 -- Prove nontrivial on ℚ implies nontrivial on ℕ
