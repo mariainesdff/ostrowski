@@ -23,7 +23,6 @@ section real
 /-- The usual absolute value on ℚ. -/
 def ring_norm.real : ring_norm ℚ :=
 { to_fun    := λ x : ℚ, |x|,
-<<<<<<< HEAD
   map_zero' := by simp only [rat.cast_zero, abs_zero],
   add_le'   := norm_add_le,
   neg'      := norm_neg,
@@ -32,14 +31,6 @@ def ring_norm.real : ring_norm ℚ :=
   mul_le'   := norm_mul_le }
 
 @[simp] lemma ring_norm_eq_abs (r : ℚ) : ring_norm.real r = |r| := rfl
-=======
-  map_zero' := by simp,
-  add_le'   := norm_add_le,
-  neg'      := by simp,
-  eq_zero_of_map_eq_zero' := by simp,
-  mul_le'   := by simp [abs_mul],
-  }
->>>>>>> 9aa0db5b41ba93f86e9dc94f4f6e02e7b554093f
 
 lemma ring_norm.real_mul_eq : mul_eq ring_norm.real :=
 by simp only [mul_eq_def, abs_mul, ring_norm_eq_abs, rat.cast_mul, eq_self_iff_true, forall_const]
