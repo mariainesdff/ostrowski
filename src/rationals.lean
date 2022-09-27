@@ -87,6 +87,8 @@ end
 
 section non_archimedean
 
+variables (f : ring_norm ℚ)
+
 lemma nat_norm_leq_one (n : ℕ) (heq : mul_eq f) (harc : is_nonarchimedean f) : f n ≤ 1 :=
 begin
   induction n with c hc,
@@ -105,6 +107,10 @@ end
 -- Show that it's equal to pℤ
 -- Get s
 -- Finish
+
+lemma nat_nontriv_of_rat_nontriv (hf_mul : mul_eq f) : f ≠ 1 → (∃ n : ℕ, f n < 1) := sorry
+
+
 
 end non_archimedean
 
