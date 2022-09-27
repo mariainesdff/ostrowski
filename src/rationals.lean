@@ -32,16 +32,8 @@ def ring_norm.real : ring_norm ℚ :=
 
 @[simp] lemma ring_norm_eq_abs (r : ℚ) : ring_norm.real r = |r| := rfl
 
-<<<<<<< HEAD
-lemma ring_norm.real_mul_eq : mul_eq ring_norm.real := 
-begin
-  intros r s,
-  sorry
-end
-=======
 lemma ring_norm.real_mul_eq : mul_eq ring_norm.real :=
 by simp only [mul_eq_def, abs_mul, ring_norm_eq_abs, rat.cast_mul, eq_self_iff_true, forall_const]
->>>>>>> 700a6e1d9bca731c026b7e423c798a2ecec5d2e4
 
 end real
 
