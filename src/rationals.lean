@@ -85,6 +85,8 @@ end
 -- this isn't true if f = 0
 -- use seminorm_one_eq_one_iff_ne_zero instead
 
+section non_archimedean
+
 lemma nat_norm_leq_one (n : ℕ) (heq : mul_eq f) (harc : is_nonarchimedean f) : f n ≤ 1 :=
 begin
   induction n with c hc,
@@ -95,6 +97,20 @@ begin
     simp only [nat.cast_add, nat.cast_one],
     exact le_trans harc (max_le hc rfl.ge), },
 end
+
+-- Proof strategy:
+-- Prove nontrivial on ℚ implies nontrivial on ℕ
+-- Show that there is a prime with norm < 1
+-- Show that P is an ideal
+-- Show that it's equal to pℤ
+-- Get s
+-- Finish
+
+end non_archimedean
+
+section archimedean
+
+end archimedean
 
 /-- Ostrowski's Theorem -/
 theorem rat_ring_norm_p_adic_or_real (f : ring_norm ℚ) (hf_nontriv : f ≠ 1) (hf_mul : mul_eq f) :
