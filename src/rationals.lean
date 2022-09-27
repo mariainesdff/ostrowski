@@ -124,17 +124,13 @@ begin
     exact le_trans harc (max_le hc rfl.ge), },
 end
 
-lemma int_norm_le_one (n : ℤ) (heq : mul_eq f) (harc : is_nonarchimedean f) : f n ≤ 1 :=
+lemma int_norm_le_one (z : ℤ) (heq : mul_eq f) (harc : is_nonarchimedean f) : f z ≤ 1 :=
 begin
-  cases int.eq_coe_or_neg n,
-  cases h,
-  { rw h,
-  exact nat_norm_leq_one w heq harc },
-  { 
-    rw neg_eq_neg_one_mul at h,
-    rw h,
-    sorry,
-    -- use heq and norm_neg_one_eq_one 
+  obtain ⟨n, rfl | rfl⟩ := z.eq_coe_or_neg,
+  { exact nat_norm_leq_one n heq harc },
+  { have : ↑((-1 : ℤ) * n) = (-1 : ℚ) * n := by norm_cast,
+    rw [neg_eq_neg_one_mul, this, heq, norm_neg_one_eq_one heq, one_mul],
+    exact nat_norm_leq_one n heq harc,
   },
 end
 -- Proof strategy:
