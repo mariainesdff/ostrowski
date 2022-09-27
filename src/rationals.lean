@@ -64,10 +64,7 @@ def ring_norm.padic (p : ℕ) [hp : fact (nat.prime p)] : ring_norm ℚ :=
 
 lemma ring_norm.padic_mul_eq (p : ℕ) [hp : fact (nat.prime p)] :
   mul_eq (@ring_norm.padic p hp) :=
-begin
-  intros r s,
-  sorry
-end
+sorry
 
 lemma ring_norm.padic_is_nonarchimedean (p : ℕ) [hp : fact (nat.prime p)] :
   is_nonarchimedean (@ring_norm.padic p hp) :=
