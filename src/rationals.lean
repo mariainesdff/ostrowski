@@ -215,8 +215,8 @@ begin
   sorry
 end
 
--- Show that I is an ideal
-def I (harc : is_nonarchimedean f) (heq : mul_eq f) : ideal ℤ := 
+-- Show that 𝔞 is an ideal
+def 𝔞 (harc : is_nonarchimedean f) (heq : mul_eq f) : ideal ℤ :=
 { carrier := {a : ℤ | f a < 1},
   add_mem' := begin
      intros a b ha hb,
@@ -237,7 +237,30 @@ def I (harc : is_nonarchimedean f) (heq : mul_eq f) : ideal ℤ :=
     exact mul_lt_of_le_of_lt_one' (int_norm_le_one a heq harc) hb (map_nonneg f b) zero_lt_one,
   end }
 
--- Show that it's equal to pℤ
+-- Show that it contains pZ
+lemma a_contains_prime_ideal (harc : is_nonarchimedean f) (heq : mul_eq f) (h_nontriv : f ≠ 1) :
+  ∃ (p : ℕ) [hp : fact (nat.prime p)], 𝔞 harc heq ≥ ideal.span {p} :=
+begin
+  obtain ⟨p, hp, hbound⟩ := ex_prime_norm_lt_one heq harc h_nontriv,
+  use p,
+  split,
+  { exact hp },
+  sorry,
+end
+
+-- Show that it's in fact equal to pZ (since pZ is a maximal ideal)
+lemma a_eq_prime_ideal (harc : is_nonarchimedean f) (heq : mul_eq f) (h_nontriv : f ≠ 1) :
+  ∃ (p : ℕ) [hp : fact (nat.prime p)], 𝔞 harc heq = ideal.span {p} :=
+begin
+  obtain ⟨p, hp, hinc⟩ := a_contains_prime_ideal harc heq h_nontriv,
+  use p,
+  split, { exact hp },
+  cases hp,
+  have hp' := nat.prime_iff.mp hp,
+  rw ←ideal.span_singleton_prime (nat.prime.ne_zero hp) at hp',
+  sorry,
+end
+
 -- Get s
 -- Finish
 
