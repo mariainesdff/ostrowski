@@ -100,6 +100,17 @@ begin
     apply h',
     exact H₂,
    },
+
+--TODO: generalise to division rings, get rid of field_simp
+lemma ring_norm.div_eq (h : mul_eq f) (p : ℚ) {q : ℚ} (hq : q ≠ 0) : f (p / q) = (f p) / (f q) :=
+begin
+  have H : f q ≠ 0,
+  { intro fq0,
+    have := f.eq_zero_of_map_eq_zero' q fq0,
+    exact hq this },
+  calc f (p / q) = f (p / q) * f q / f q : by field_simp
+  ... = f (p / q * q)  / f q : by rw h (p / q) q
+  ... = f p / f q : by field_simp,
 end
 
 section non_archimedean
@@ -142,9 +153,57 @@ begin
     linarith },
   ext,
   by_cases h : x = 0,
-  { simp [h] },
-  { sorry }
+  { simp only [h, map_zero]},
+  { simp only [h, ring_norm.apply_one, if_false],
+    rw ← rat.num_div_denom x,
+    have hdenomnon0 : (x.denom : ℚ) ≠ 0,
+    { norm_cast,
+      linarith [x.pos] }, --probably rw on x.pos
+    rw ring_norm.div_eq hf_mul (x.num : ℚ) hdenomnon0,
+    have H₁ : f x.num = 1,
+    { have pos_num_f_eq_1 : ∀ a : ℚ , (a.num > 0 → f a.num = 1),
+      { intros a num_pos,
+        have coe_eq : (a.num : ℚ) = (a.num.to_nat : ℚ),
+      { norm_cast,
+        exact (int.to_nat_of_nonneg (by linarith)).symm, },
+      rw coe_eq,
+      /-have x_num_pos : x.num > 0,
+      { apply lt_of_le_of_ne hsign,
+        intro H,
+        apply h,
+        rw rat.zero_iff_num_zero,
+        rw H },-/
+      have a_num_nat_nonzero : a.num.to_nat ≠ 0,
+      { intro H,
+        rw int.to_nat_eq_zero at H,
+        linarith },
+      exact hfnateq1 _ a_num_nat_nonzero },
+      by_cases hsign : x.num ≥ 0,
+      { apply pos_num_f_eq_1,
+        rw [rat.zero_iff_num_zero, ←ne.def] at h,
+        exact lt_of_le_of_ne hsign h.symm },
+      { push_neg at hsign,
+        rw ←f.to_fun_eq_coe,
+        rw ←f.neg' x.num,
+        rw f.to_fun_eq_coe,
+        norm_cast,
+        rw ←rat.num_neg_eq_neg_num,
+        apply pos_num_f_eq_1, 
+        rw rat.num_neg_eq_neg_num,
+        exact neg_pos.mpr hsign} },
+    have H₂ : f x.denom = 1,
+    { have := x.pos,
+      rw pos_iff_ne_zero at this,
+      exact hfnateq1 x.denom this },
+    rw [H₁, H₂],
+    norm_num }
 end
+
+def ring_norm.to_monoid_hom (f : ring_norm ℚ) (hf : mul_eq f) : monoid_hom ℚ ℝ :=
+{ to_fun   := f,
+  map_one' := norm_one_eq_one hf,
+  map_mul' := hf }
+
 -- Show that there is a prime with norm < 1
 lemma ex_prime_norm_lt_one (heq : mul_eq f) (harc : is_nonarchimedean f) 
   (h : f ≠ 1) : ∃ (p : ℕ) [hp : fact (nat.prime p)], f p < 1 :=
@@ -154,7 +213,11 @@ begin
   let t := nat.factors n,
   rw ← nat.prod_factors hn1 at hn2,
   have exp : ∀ q : ℕ, q ∈ nat.factors n → 1 ≤ f q,
-  {sorry},
+  { sorry },
+  simp only [nat.cast_list_prod] at hn2,
+  have hf_mh: f.to_fun = (f.to_monoid_hom heq).to_fun := rfl,
+  rw [← f.to_fun_eq_coe, hf_mh, (f.to_monoid_hom heq).to_fun_eq_coe, map_list_prod] at hn2,
+  
   sorry
 end
 
