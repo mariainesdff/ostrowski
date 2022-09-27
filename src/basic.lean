@@ -22,6 +22,9 @@ def is_nonarchimedean {α : Type*} [has_add α] {β : Type*} [linear_order β] (
 def mul_eq {α : Type*} [has_mul α] {β : Type*} [has_mul β] [has_le β] (f : α → β) : Prop :=
 ∀ r s, f (r * s) = (f r) * (f s)
 
+lemma mul_eq_def {α : Type*} [has_mul α] {β : Type*} [has_mul β] [has_le β] (f : α → β) :
+mul_eq f ↔ ∀ r s, f (r * s) = (f r) * (f s) := iff.rfl
+
 namespace ring_norm
 
 /-- Two ring norms `f, g` on `R` are equivalent if there exists a positive constant

@@ -23,21 +23,27 @@ section real
 /-- The usual absolute value on ℚ. -/
 def ring_norm.real : ring_norm ℚ :=
 { to_fun    := λ x : ℚ, |x|,
-  map_zero' := by simp,
+  map_zero' := by simp only [rat.cast_zero, abs_zero],
   add_le'   := norm_add_le,
-  neg'      := by simp,
-  eq_zero_of_map_eq_zero' := by simp,
-  mul_le'   := by simp [abs_mul],
-  }
+  neg'      := norm_neg,
+  eq_zero_of_map_eq_zero' := 
+  by simp only [abs_eq_zero, rat.cast_eq_zero, imp_self, forall_const],
+  mul_le'   := norm_mul_le }
 
+@[simp] lemma ring_norm_eq_abs (r : ℚ) : ring_norm.real r = |r| := rfl
+
+<<<<<<< HEAD
 lemma ring_norm.real_mul_eq : mul_eq ring_norm.real := 
 begin
   intros r s,
   sorry
 end
+=======
+lemma ring_norm.real_mul_eq : mul_eq ring_norm.real :=
+by simp only [mul_eq_def, abs_mul, ring_norm_eq_abs, rat.cast_mul, eq_self_iff_true, forall_const]
+>>>>>>> 700a6e1d9bca731c026b7e423c798a2ecec5d2e4
 
 end real
-
 
 section padic
 
