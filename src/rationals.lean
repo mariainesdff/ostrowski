@@ -342,7 +342,8 @@ begin
   have h_irr : irreducible (p : ℤ) := (nat.prime_iff_prime_int.mp hp).irreducible,
   have hmax : ideal.is_maximal (ideal.span ({p} : set ℤ)) :=
     principal_ideal_ring.is_maximal_of_irreducible h_irr,
-  sorry,
+  symmetry,
+  exact hmax.eq_of_le (a_proper harc heq) hinc,
 end
 
 -- Get s
