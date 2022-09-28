@@ -339,10 +339,10 @@ begin
   use p,
   split, { exact hp },
   cases hp,
-  have hp' := nat.prime_iff.mp hp,
-  rw ←ideal.span_singleton_prime (nat.prime.ne_zero hp) at hp',
+  have h_irr : irreducible (p : ℤ) := (nat.prime_iff_prime_int.mp hp).irreducible,
+  have hmax : ideal.is_maximal (ideal.span ({p} : set ℤ)) :=
+    principal_ideal_ring.is_maximal_of_irreducible h_irr,
   sorry,
-  
 end
 
 -- Get s
