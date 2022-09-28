@@ -318,17 +318,14 @@ lemma a_contains_prime_ideal (harc : is_nonarchimedean f) (heq : mul_eq f) (h_no
 begin
   obtain ⟨p, hp, hbound⟩ := ex_prime_norm_lt_one heq harc h_nontriv,
   use p,
-  split,
-  { exact hp },
-  {apply ideal.span_le.mpr,
-   intros ppr hp,
-   unfold 𝔞,
-   simp at hp,
-   simp,
-   rw hp, 
-   exact hbound,
-   }
-  
+  split, { exact hp },
+  { apply ideal.span_le.mpr,
+    intros ppr hp,
+    unfold 𝔞,
+    simp only [set.mem_singleton_iff] at hp,
+    simp only [submodule.coe_set_mk, set.mem_set_of_eq],
+    rw hp,
+    exact hbound }
 end
 
 -- Show that it's in fact equal to pZ (since pZ is a maximal ideal)
@@ -360,31 +357,47 @@ begin
   rw [pow_succ', mul_assoc, ←hb],
 end
 
-lemma eq_p_pow_mul_ndiv_p' {a : ℤ} {p : ℕ} (hpos : 0 < a) (hprime : nat.prime p) :
-  ∃ (m b : ℕ), a = p ^ m * b ∧ ¬ p ∣ b := 
+lemma eq_p_pow_mul_ndiv_p' {a : ℤ} {p : ℕ} (hprime : nat.prime p) :
+  ∃ (m : ℕ) (b : ℤ), a = p ^ m * b ∧ ¬ (p : ℤ) ∣ b := 
+sorry
+
+lemma mul_eq_pow (heq : mul_eq f) {a : ℚ} {n : ℕ} : f (a ^ n) = (f a) ^ n :=
 begin
-  cases a,
-  { simp at hpos ⊢,
-    norm_cast,
-    exact eq_p_pow_mul_ndiv_p hpos hprime, },
-  { simp at hpos,
-    contradiction, },
+  induction n with d hd,
+  simp,
+  exact norm_one_eq_one heq,
+  sorry,
 end
 
 -- f a = (f p)^m
-lemma nat_val_eq (harc : is_nonarchimedean f) (heq : mul_eq f) (h_nontriv : f ≠ 1) {a : ℕ} (hpos : 0 < a) :
+lemma nat_val_eq (harc : is_nonarchimedean f) (heq : mul_eq f) (h_nontriv : f ≠ 1) {a : ℤ} :
   ∃ (p : ℕ) [hp : fact (nat.prime p)] (m : ℕ), f a = (f p)^m :=
 begin
-  obtain ⟨p, hprime, hbound⟩ := ex_prime_norm_lt_one heq harc h_nontriv,
+  obtain ⟨p, hprime, h_aeq⟩ := a_eq_prime_ideal harc heq h_nontriv,
   use p,
   use hprime,
   cases hprime,
-  obtain ⟨m, b, ha, hndiv⟩ := eq_p_pow_mul_ndiv_p hpos hprime,
-  -- use m,
-  -- rw ha,
-  -- have h : ↑(p ^ m * b) = ↑(p ^ m) * ↑b,
-  -- { sorry },
-  sorry,
+  obtain ⟨m, b, ha, hndiv⟩ := @eq_p_pow_mul_ndiv_p' a p hprime,
+  use m,
+  rw ha,
+  have hb : ↑b ∉ 𝔞 harc heq,
+  {
+    rw h_aeq,
+    intro hmem,
+    rw ideal.mem_span_singleton' at hmem,
+    obtain ⟨k, hk⟩ := hmem,
+    apply hndiv,
+    rw dvd_iff_exists_eq_mul_left, 
+    use k,
+    exact hk.symm,
+  },
+  unfold 𝔞 at hb,
+  simp only [int.cast_id, submodule.mem_mk, set.mem_set_of_eq, not_lt] at hb,
+  have h' : f b = 1 := le_antisymm (int_norm_le_one b heq harc) hb,
+  have stupid : ↑(↑p ^ m * b) = ↑p^m * ↑b,
+  { sorry },
+  rw [stupid, heq, h', mul_one],
+  exact mul_eq_pow heq,
 end
 
 -- Get s: (f p)^m = (padic a)^s
