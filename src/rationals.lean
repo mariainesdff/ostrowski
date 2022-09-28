@@ -198,21 +198,43 @@ def ring_norm.to_monoid_hom (f : ring_norm ℚ) (hf : mul_eq f) : monoid_hom ℚ
   map_one' := norm_one_eq_one hf,
   map_mul' := hf }
 
+-- I couldn't find this lemma in mathlib.
+lemma real.one_le_prod_of_one_le {l : list ℝ} (hl : ∀ x : ℝ, x ∈ l → 1 ≤ x) : 1 ≤ l.prod :=
+begin
+  induction l with a l ih,
+  { simp only [list.prod_nil], },
+  { simp only [list.prod_cons],
+    have goal := (ih $ λ a ha, hl a $ list.mem_cons_of_mem _ ha),
+    have goal1 := (hl _ $ list.mem_cons_self _ _),
+    nlinarith, },
+end
+
 -- Show that there is a prime with norm < 1
 lemma ex_prime_norm_lt_one (heq : mul_eq f) (harc : is_nonarchimedean f) 
   (h : f ≠ 1) : ∃ (p : ℕ) [hp : fact (nat.prime p)], f p < 1 :=
 begin
   by_contra',
   obtain ⟨n, hn1, hn2⟩ := nat_nontriv_of_rat_nontriv heq harc h,
-  let t := nat.factors n,
   rw ← nat.prod_factors hn1 at hn2,
   have exp : ∀ q : ℕ, q ∈ nat.factors n → 1 ≤ f q,
-  { sorry },
+  { intros q hq,
+    letI : fact (nat.prime q) := {out := nat.prime_of_mem_factors hq},
+    specialize this q,
+    exact this, },
   simp only [nat.cast_list_prod] at hn2,
   have hf_mh: f.to_fun = (f.to_monoid_hom heq).to_fun := rfl,
   rw [← f.to_fun_eq_coe, hf_mh, (f.to_monoid_hom heq).to_fun_eq_coe, map_list_prod] at hn2,
-  
-  sorry
+  simp only [list.map_map] at hn2,
+  have h : ∀ (x ∈ (list.map ((f.to_monoid_hom heq) ∘ (coe : ℕ → ℚ)) n.factors)), 1 ≤ x,
+  { intros x hx,
+    simp only [list.mem_map, function.comp_app] at hx,
+    rcases hx with ⟨a, ha1, ha2⟩,
+    letI : fact (nat.prime a) := {out := nat.prime_of_mem_factors ha1},
+    specialize exp a ha1,
+    rw ← ha2,
+    convert exp, },
+  have goal := real.one_le_prod_of_one_le h,
+  linarith,
 end
 
 lemma prime_triv_nat_triv (heq : mul_eq f) (harc : is_nonarchimedean f) 
