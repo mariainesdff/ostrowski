@@ -394,10 +394,12 @@ begin
   unfold 𝔞 at hb,
   simp only [int.cast_id, submodule.mem_mk, set.mem_set_of_eq, not_lt] at hb,
   have h' : f b = 1 := le_antisymm (int_norm_le_one b heq harc) hb,
-  have stupid : ↑(↑p ^ m * b) = ↑p^m * ↑b,
-  { sorry },
-  rw [stupid, heq, h', mul_one],
-  exact mul_eq_pow heq,
+  have stupid : f ((p : ℚ)^ m * (b : ℚ)) = (f (p : ℚ)) ^m,
+  { rw [heq, h'],
+    rwa mul_one,
+    exact mul_eq_pow heq, },
+  convert stupid,
+  norm_cast,
 end
 
 -- Get s: (f p)^m = (padic a)^s
