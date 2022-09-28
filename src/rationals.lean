@@ -360,6 +360,17 @@ begin
   rw [pow_succ', mul_assoc, ←hb],
 end
 
+lemma eq_p_pow_mul_ndiv_p' {a : ℤ} {p : ℕ} (hpos : 0 < a) (hprime : nat.prime p) :
+  ∃ (m b : ℕ), a = p ^ m * b ∧ ¬ p ∣ b := 
+begin
+  cases a,
+  { simp at hpos ⊢,
+    norm_cast,
+    exact eq_p_pow_mul_ndiv_p hpos hprime, },
+  { simp at hpos,
+    contradiction, },
+end
+
 -- f a = (f p)^m
 lemma nat_val_eq (harc : is_nonarchimedean f) (heq : mul_eq f) (h_nontriv : f ≠ 1) {a : ℕ} (hpos : 0 < a) :
   ∃ (p : ℕ) [hp : fact (nat.prime p)] (m : ℕ), f a = (f p)^m :=
@@ -377,6 +388,13 @@ begin
 end
 
 -- Get s: (f p)^m = (padic a)^s
+lemma get_s (harc : is_nonarchimedean f) (heq : mul_eq f) (h_nontriv : f ≠ 1) (a : ℤ)
+  (p : ℕ) [hp : fact (nat.prime p)] (m : ℕ) : 
+    ∃ s : ℝ, (f p)^m = (@ring_norm.padic p hp a)^s :=
+begin
+  
+  sorry
+end
 
 -- Extend this to ℚ using div_eq
 
