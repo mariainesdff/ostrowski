@@ -358,16 +358,60 @@ begin
   rw [pow_succ, pow_succ, ←hd, heq],
 end
 
+lemma arithmetic {p v : ℝ} (m : ℕ) (hp : p > 0) (hv : v > 0) : v ^ m = (p ^ m)⁻¹ ^ (-real.log v / real.log p) :=
+begin
+  rw ←real.rpow_neg_one,
+  have : p ^ m = p ^ (m : ℝ) := by norm_cast,
+  rw this,
+  rw ←(real.rpow_mul (le_of_lt hp)),
+  rw ←(real.rpow_mul (le_of_lt hp)),
+  rw neg_div,
+  simp only [mul_neg, mul_one, neg_mul, neg_neg],
+  rw mul_div,
+  rw ←real.log_rpow hv,
+  rw real.rpow_def_of_pos hp,
+  rw mul_div_left_comm,
+  have hlp : real.log p ≠ 0,
+  { sorry },
+  rw div_self hlp,
+  rw mul_one,
+  rw real.exp_log,
+  { norm_cast },
+  norm_cast,
+  exact pow_pos hv m,
+end
+
 -- f a = (f p)^m = ring_norm a
-lemma int_val_eq (harc : is_nonarchimedean f) (heq : mul_eq f) (h_nontriv : f ≠ 1) {a : ℤ} (ha: a ≠ 0) :
-  ∃ (p : ℕ) [hp : fact (nat.prime p)] (s : ℝ), f a = (@ring_norm.padic p hp a)^s :=
+lemma int_val_eq (harc : is_nonarchimedean f) (heq : mul_eq f) (h_nontriv : f ≠ 1) :
+  ∃ (p : ℕ) [hp : fact (nat.prime p)] (s : ℝ), ∀ (a : ℤ), f a = (@ring_norm.padic p hp a)^s :=
 begin
   obtain ⟨p, hprime, h_aeq⟩ := a_eq_prime_ideal harc heq h_nontriv,
   use p,
   use hprime,
-  let s := (-real.log (p : ℝ) / real.log (f p)),
-  use s,
   cases hprime,
+  have fpgt0 : (f p) > 0,
+  { apply lt_of_le_of_ne (map_nonneg f (p : ℚ)),
+    intro h',
+    have := f.eq_zero_of_map_eq_zero' p h'.symm,
+    exact (nat.cast_ne_zero.mpr (nat.prime.ne_zero hprime)) this },
+  have fpneq1 : (f p) ≠ 1,
+  -- prove this through p ∈ 𝔞 through h_aeq
+  { sorry },
+  let s := (-real.log (f p : ℝ) / real.log p),
+  have hs : s ≠ 0,
+  { have hdenom : real.log p ≠ 0 := real.log_ne_zero_of_pos_of_ne_one
+      (nat.cast_pos.mpr (nat.prime.pos hprime))
+      (nat.cast_ne_one.mpr (nat.prime.ne_one hprime)),
+    have pneq0 : (p : ℚ) ≠ 0 := nat.cast_ne_zero.mpr (ne_of_gt (nat.prime.pos hprime)),
+    have hnum' : real.log (f p) ≠ 0 := real.log_ne_zero_of_pos_of_ne_one fpgt0 fpneq1,
+    have hnum := neg_ne_zero.mpr hnum',
+    exact div_ne_zero hnum hdenom,
+  },
+  use s,
+  intro a,
+  by_cases ha : a = 0,
+  { rw ha,
+    simp only [hs, int.cast_zero, map_zero, real.zero_rpow, ne.def, not_false_iff] },
   have hfin := mult_finite hprime ha,
   obtain ⟨b, hapb, hndiv⟩ := multiplicity.exists_eq_pow_mul_and_not_dvd hfin,
   let m := (multiplicity (p : ℤ) a).get hfin,
@@ -401,9 +445,8 @@ begin
   unfold padic_val_int,
   unfold padic_val_nat,
   simp [ha, h₁, h₂, h₃],
-  have arith : (f p) ^ m = (p ^ m)⁻¹ ^ (-real.log p / real.log (f p)),
-  { sorry },
-  exact arith,
+  have hppos : (p : ℝ) > 0 := nat.cast_pos.mpr (nat.prime.pos hprime),
+  exact arithmetic m hppos fpgt0,
 end
 
 -- Extend this to ℚ using div_eq
