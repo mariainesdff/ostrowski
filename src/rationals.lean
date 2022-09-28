@@ -346,10 +346,35 @@ begin
   exact hmax.eq_of_le (a_proper harc heq) hinc,
 end
 
+lemma eq_p_pow_mul_ndiv_p {a : ℕ} {p : ℕ} (hpos : 0 < a) (hprime : nat.prime p) :
+  ∃ (m b : ℕ), a = p ^ m * b ∧ ¬ p ∣ b :=
+begin
+  have h := multiplicity.finite_nat_iff.mpr ⟨hprime.ne_one, hpos⟩,
+  cases multiplicity.pow_multiplicity_dvd h with b hb,
+  use [(multiplicity p a).get h, b],
+  refine ⟨hb, _⟩,
+  have hg := multiplicity.is_greatest' h (nat.lt_succ_self _),
+  contrapose! hg,
+  rcases hg with ⟨k, rfl⟩,
+  apply dvd.intro k,
+  rw [pow_succ', mul_assoc, ←hb],
+end
+
 -- f a = (f p)^m
-lemma a_val_eq (harc : is_nonarchimedean f) (heq : mul_eq f) (h_nontriv : f ≠ 1) (a : ℤ) :
+lemma nat_val_eq (harc : is_nonarchimedean f) (heq : mul_eq f) (h_nontriv : f ≠ 1) {a : ℕ} (hpos : 0 < a) :
   ∃ (p : ℕ) [hp : fact (nat.prime p)] (m : ℕ), f a = (f p)^m :=
-sorry
+begin
+  obtain ⟨p, hprime, hbound⟩ := ex_prime_norm_lt_one heq harc h_nontriv,
+  use p,
+  use hprime,
+  cases hprime,
+  obtain ⟨m, b, ha, hndiv⟩ := eq_p_pow_mul_ndiv_p hpos hprime,
+  -- use m,
+  -- rw ha,
+  -- have h : ↑(p ^ m * b) = ↑(p ^ m) * ↑b,
+  -- { sorry },
+  sorry,
+end
 
 -- Get s: (f p)^m = (padic a)^s
 
