@@ -276,6 +276,20 @@ def 𝔞 (harc : is_nonarchimedean f) (heq : mul_eq f) : ideal ℤ :=
     exact mul_lt_of_le_of_lt_one' (int_norm_le_one a heq harc) hb (map_nonneg f b) zero_lt_one,
   end }
 
+lemma a_proper (harc : is_nonarchimedean f) (heq : mul_eq f) : 𝔞 harc heq ≠ (⊤ : ideal ℤ) :=
+begin
+  intro h,
+  have : (1 : ℤ) ∉ (𝔞 harc heq),
+  { 
+    unfold 𝔞,
+    simp only [submodule.mem_mk, set.mem_set_of_eq, int.cast_one, not_lt],
+    exact (norm_one_eq_one heq).ge,
+  },
+  rw h at this,
+  apply this,
+  exact trivial,
+end
+
 -- Show that it contains pZ
 lemma a_contains_prime_ideal (harc : is_nonarchimedean f) (heq : mul_eq f) (h_nontriv : f ≠ 1) :
   ∃ (p : ℕ) [hp : fact (nat.prime p)], 𝔞 harc heq ≥ ideal.span {p} :=
