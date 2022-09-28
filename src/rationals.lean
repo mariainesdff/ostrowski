@@ -198,7 +198,7 @@ def ring_norm.to_monoid_hom (f : ring_norm ℚ) (hf : mul_eq f) : monoid_hom ℚ
   map_one' := norm_one_eq_one hf,
   map_mul' := hf }
 
--- I couldn't find this lemma in mathlib.
+-- I couldn't find this lemma in mathlib. A similar version in mathlib is `one_le_prod_of_one_le`.
 lemma real.one_le_prod_of_one_le {l : list ℝ} (hl : ∀ x : ℝ, x ∈ l → 1 ≤ x) : 1 ≤ l.prod :=
 begin
   induction l with a l ih,
