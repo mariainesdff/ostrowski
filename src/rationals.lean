@@ -381,8 +381,11 @@ end
 -- Extend this to ℚ using div_eq
 
 -- Finish: hence f and padic are equivalent
-
-
+lemma f_equiv_padic (harc : is_nonarchimedean f) (heq : mul_eq f) (h_nontriv : f ≠ 1) : 
+ ∃ (p : ℕ) [hp : fact (nat.prime p)], ring_norm.equiv f (@ring_norm.padic p hp) :=
+begin
+sorry,
+end
 
 end non_archimedean
 
