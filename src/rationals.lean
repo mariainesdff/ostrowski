@@ -364,9 +364,9 @@ sorry
 lemma mul_eq_pow (heq : mul_eq f) {a : ℚ} {n : ℕ} : f (a ^ n) = (f a) ^ n :=
 begin
   induction n with d hd,
-  simp,
+  simp only [pow_zero],
   exact norm_one_eq_one heq,
-  sorry,
+  rw [pow_succ, pow_succ, ←hd, heq],
 end
 
 -- f a = (f p)^m
