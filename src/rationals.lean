@@ -215,6 +215,45 @@ begin
   sorry
 end
 
+lemma prime_triv_nat_triv (heq : mul_eq f) (harc : is_nonarchimedean f) 
+  (H : ∀ p : ℕ , p.prime → f p = 1) : ∀ n : ℕ, n ≠ 0 → f n = 1 :=
+begin
+  intros n n_pos,
+  induction n using nat.strong_induction_on with n hn,
+  by_cases nge2 : n < 2,
+  { interval_cases n,
+    { exfalso, apply n_pos, refl },
+    { exact norm_one_eq_one heq } },
+  { push_neg at hn,
+    have : n ≠ 1,
+    { intro H,
+      rw H at nge2,
+      apply nge2,
+      norm_num },
+    obtain ⟨p, p_prime, p_div⟩ := nat.exists_prime_and_dvd this,
+    obtain ⟨k, hk⟩ := p_div,
+    rw hk,
+    rw nat.cast_mul,
+    rw heq,
+    rw H p p_prime,
+    rw one_mul,
+    have k_pos : k ≠ 0,
+    { intro k_zero, apply n_pos, rw hk, rw k_zero, rw mul_zero },
+    have kltn : k < n,
+    { have := nat.prime.two_le p_prime,
+      rw hk,
+      have ineq1 : 2*k ≤ p*k,
+      { exact mul_le_mul_right' this k },
+      have ineq2 : k < 2 * k,
+      { nth_rewrite 0 ←one_mul k,
+        have : 0 < k,
+        { exact zero_lt_iff.mpr k_pos },
+        apply (mul_lt_mul_right this).mpr,
+        norm_num, },
+      exact lt_of_lt_of_le ineq2 ineq1 },
+    exact hn k kltn k_pos }
+end
+
 -- Show that 𝔞 is an ideal
 def 𝔞 (harc : is_nonarchimedean f) (heq : mul_eq f) : ideal ℤ :=
 { carrier := {a : ℤ | f a < 1},
