@@ -99,6 +99,9 @@ begin
     contradiction },
 end
 
+lemma norm_pos_of_ne_zero {x : ℚ} (h : x ≠ 0) : f x > 0 :=
+lt_of_le_of_ne (map_nonneg f x) (λ h', h (f.eq_zero_of_map_eq_zero' x h'.symm))
+
 --TODO: generalise to division rings, get rid of field_simp
 lemma ring_norm.div_eq (h : mul_eq f) (p : ℚ) {q : ℚ} (hq : q ≠ 0) : f (p / q) = (f p) / (f q) :=
 begin
@@ -358,24 +361,15 @@ begin
   rw [pow_succ, pow_succ, ←hd, heq],
 end
 
-lemma arithmetic {p v : ℝ} (m : ℕ) (hp : p > 0) (hv : v > 0) : v ^ m = (p ^ m)⁻¹ ^ (-real.log v / real.log p) :=
+-- the equality at the end of the next lemma
+lemma arithmetic {p v : ℝ} (m : ℕ) (hp : p > 0) (hlogp : real.log p ≠ 0) (hv : v > 0) : v ^ m = (p ^ m)⁻¹ ^ (-real.log v / real.log p) :=
 begin
   rw ←real.rpow_neg_one,
   have : p ^ m = p ^ (m : ℝ) := by norm_cast,
-  rw this,
-  rw ←(real.rpow_mul (le_of_lt hp)),
-  rw ←(real.rpow_mul (le_of_lt hp)),
-  rw neg_div,
+  rw [this, ←(real.rpow_mul (le_of_lt hp)), ←(real.rpow_mul (le_of_lt hp)), neg_div],
   simp only [mul_neg, mul_one, neg_mul, neg_neg],
-  rw mul_div,
-  rw ←real.log_rpow hv,
-  rw real.rpow_def_of_pos hp,
-  rw mul_div_left_comm,
-  have hlp : real.log p ≠ 0,
-  { sorry },
-  rw div_self hlp,
-  rw mul_one,
-  rw real.exp_log,
+  rw [mul_div, ←real.log_rpow hv, real.rpow_def_of_pos hp, mul_div_left_comm,
+    div_self hlogp, mul_one, real.exp_log],
   { norm_cast },
   norm_cast,
   exact pow_pos hv m,
@@ -389,28 +383,21 @@ begin
   use p,
   use hprime,
   cases hprime,
-  have fpgt0 : (f p) > 0,
-  { apply lt_of_le_of_ne (map_nonneg f (p : ℚ)),
-    intro h',
-    have := f.eq_zero_of_map_eq_zero' p h'.symm,
-    exact (nat.cast_ne_zero.mpr (nat.prime.ne_zero hprime)) this },
-  have fpneq1 : (f p) ≠ 1,
-  -- prove this through p ∈ 𝔞 through h_aeq
-  { sorry },
+  have pneq0 : (p : ℚ) ≠ 0 := nat.cast_ne_zero.mpr (ne_of_gt (nat.prime.pos hprime)),
+  have fpgt0 := norm_pos_of_ne_zero pneq0,
+  have hlogp : real.log p ≠ 0 := real.log_ne_zero_of_pos_of_ne_one
+    (nat.cast_pos.mpr (nat.prime.pos hprime))
+    (nat.cast_ne_one.mpr (nat.prime.ne_one hprime)),
   let s := (-real.log (f p : ℝ) / real.log p),
-  have hs : s ≠ 0,
-  { have hdenom : real.log p ≠ 0 := real.log_ne_zero_of_pos_of_ne_one
-      (nat.cast_pos.mpr (nat.prime.pos hprime))
-      (nat.cast_ne_one.mpr (nat.prime.ne_one hprime)),
-    have pneq0 : (p : ℚ) ≠ 0 := nat.cast_ne_zero.mpr (ne_of_gt (nat.prime.pos hprime)),
-    have hnum' : real.log (f p) ≠ 0 := real.log_ne_zero_of_pos_of_ne_one fpgt0 fpneq1,
-    have hnum := neg_ne_zero.mpr hnum',
-    exact div_ne_zero hnum hdenom,
-  },
   use s,
   intro a,
   by_cases ha : a = 0,
   { rw ha,
+    have hs : s ≠ 0,
+    { have fpneq1 : (f p) ≠ 1, -- prove this through p ∈ 𝔞 through h_aeq
+      { sorry },
+      have hlogfp : real.log (f p) ≠ 0 := real.log_ne_zero_of_pos_of_ne_one fpgt0 fpneq1,
+      exact div_ne_zero (neg_ne_zero.mpr hlogfp) hlogp },
     simp only [hs, int.cast_zero, map_zero, real.zero_rpow, ne.def, not_false_iff] },
   have hfin := mult_finite hprime ha,
   obtain ⟨b, hapb, hndiv⟩ := multiplicity.exists_eq_pow_mul_and_not_dvd hfin,
@@ -438,15 +425,12 @@ begin
   },
   rw this,
   simp [ring_norm_eq_padic_norm, ha],
-  have h₁ := nat.prime.ne_one hprime,
-  have h₂ : 0 < a.nat_abs := int.nat_abs_pos_of_ne_zero ha,
-  have h₃ : multiplicity p a.nat_abs = multiplicity (p : ℤ) a,
+  unfold padic_val_int padic_val_nat,
+  have mult_abs : multiplicity p a.nat_abs = multiplicity (p : ℤ) a,
   { sorry },
-  unfold padic_val_int,
-  unfold padic_val_nat,
-  simp [ha, h₁, h₂, h₃],
-  have hppos : (p : ℝ) > 0 := nat.cast_pos.mpr (nat.prime.pos hprime),
-  exact arithmetic m hppos fpgt0,
+  simp [ha, hprime.ne_one, int.nat_abs_pos_of_ne_zero ha, mult_abs],
+  have hppos : (p : ℝ) > 0 := nat.cast_pos.mpr (hprime.pos),
+  exact arithmetic m hppos hlogp fpgt0,
 end
 
 -- Extend this to ℚ using div_eq
