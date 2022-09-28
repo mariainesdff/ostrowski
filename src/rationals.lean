@@ -401,13 +401,13 @@ begin
 end
 
 -- Get s: (f p)^m = (padic a)^s
-lemma get_s (harc : is_nonarchimedean f) (heq : mul_eq f) (h_nontriv : f ≠ 1) (a : ℤ)
-  (p : ℕ) [hp : fact (nat.prime p)] (m : ℕ) : 
-    ∃ s : ℝ, (f p)^m = (@ring_norm.padic p hp a)^s :=
-begin
+--lemma get_s (harc : is_nonarchimedean f) (heq : mul_eq f) (h_nontriv : f ≠ 1) (a : ℤ)
+--  (p : ℕ) [hp : fact (nat.prime p)] (m : ℕ) : 
+--    ∃ s : ℝ, (f p)^m = (@ring_norm.padic p hp a)^s :=
+--begin
   
-  sorry
-end
+--  sorry
+--end
 
 -- Extend this to ℚ using div_eq
 
