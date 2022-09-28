@@ -343,23 +343,12 @@ begin
   exact hmax.eq_of_le (a_proper harc heq) hinc,
 end
 
-lemma eq_p_pow_mul_ndiv_p {a : ℕ} {p : ℕ} (hpos : 0 < a) (hprime : nat.prime p) :
-  ∃ (m b : ℕ), a = p ^ m * b ∧ ¬ p ∣ b :=
+lemma mult_finite {a : ℤ} {p : ℕ} (hprime : nat.prime p) (ha : a ≠ 0) :
+  multiplicity.finite (p : ℤ) a :=
 begin
-  have h := multiplicity.finite_nat_iff.mpr ⟨hprime.ne_one, hpos⟩,
-  cases multiplicity.pow_multiplicity_dvd h with b hb,
-  use [(multiplicity p a).get h, b],
-  refine ⟨hb, _⟩,
-  have hg := multiplicity.is_greatest' h (nat.lt_succ_self _),
-  contrapose! hg,
-  rcases hg with ⟨k, rfl⟩,
-  apply dvd.intro k,
-  rw [pow_succ', mul_assoc, ←hb],
+  apply multiplicity.finite_int_iff.mpr,
+  simp only [ha, hprime.ne_one, int.nat_abs_of_nat, ne.def, not_false_iff, and_self],
 end
-
-lemma eq_p_pow_mul_ndiv_p' {a : ℤ} {p : ℕ} (hprime : nat.prime p) :
-  ∃ (m : ℕ) (b : ℤ), a = p ^ m * b ∧ ¬ (p : ℤ) ∣ b := 
-sorry
 
 lemma mul_eq_pow (heq : mul_eq f) {a : ℚ} {n : ℕ} : f (a ^ n) = (f a) ^ n :=
 begin
@@ -369,47 +358,53 @@ begin
   rw [pow_succ, pow_succ, ←hd, heq],
 end
 
--- f a = (f p)^m
-lemma nat_val_eq (harc : is_nonarchimedean f) (heq : mul_eq f) (h_nontriv : f ≠ 1) {a : ℤ} :
-  ∃ (p : ℕ) [hp : fact (nat.prime p)] (m : ℕ), f a = (f p)^m :=
+-- f a = (f p)^m = ring_norm a
+lemma int_val_eq (harc : is_nonarchimedean f) (heq : mul_eq f) (h_nontriv : f ≠ 1) {a : ℤ} (ha: a ≠ 0) :
+  ∃ (p : ℕ) [hp : fact (nat.prime p)] (s : ℝ), f a = (@ring_norm.padic p hp a)^s :=
 begin
   obtain ⟨p, hprime, h_aeq⟩ := a_eq_prime_ideal harc heq h_nontriv,
   use p,
   use hprime,
+  let s := (-real.log (p : ℝ) / real.log (f p)),
+  use s,
   cases hprime,
-  obtain ⟨m, b, ha, hndiv⟩ := @eq_p_pow_mul_ndiv_p' a p hprime,
-  use m,
-  rw ha,
-  have hb : ↑b ∉ 𝔞 harc heq,
-  {
-    rw h_aeq,
-    intro hmem,
-    rw ideal.mem_span_singleton' at hmem,
-    obtain ⟨k, hk⟩ := hmem,
-    apply hndiv,
-    rw dvd_iff_exists_eq_mul_left, 
-    use k,
-    exact hk.symm,
+  have hfin := mult_finite hprime ha,
+  obtain ⟨b, hapb, hndiv⟩ := multiplicity.exists_eq_pow_mul_and_not_dvd hfin,
+  let m := (multiplicity (p : ℤ) a).get hfin,
+  have : f a = (f p) ^ m,
+  { rw hapb,
+    have hb : ↑b ∉ 𝔞 harc heq,
+    { rw h_aeq,
+      intro hmem,
+      rw ideal.mem_span_singleton' at hmem,
+      obtain ⟨k, hk⟩ := hmem,
+      apply hndiv,
+      rw dvd_iff_exists_eq_mul_left,
+      use k,
+      exact hk.symm },
+    unfold 𝔞 at hb,
+    simp only [int.cast_id, submodule.mem_mk, set.mem_set_of_eq, not_lt] at hb,
+    have h' : f b = 1 := le_antisymm (int_norm_le_one b heq harc) hb,
+    have h'' : f ((p : ℚ) ^ m * (b : ℚ)) = (f (p : ℚ)) ^ m,
+    { rw [heq, h'],
+      rw mul_one,
+      exact mul_eq_pow heq },
+    convert h'',
+    norm_cast,
   },
-  unfold 𝔞 at hb,
-  simp only [int.cast_id, submodule.mem_mk, set.mem_set_of_eq, not_lt] at hb,
-  have h' : f b = 1 := le_antisymm (int_norm_le_one b heq harc) hb,
-  have stupid : f ((p : ℚ)^ m * (b : ℚ)) = (f (p : ℚ)) ^m,
-  { rw [heq, h'],
-    rwa mul_one,
-    exact mul_eq_pow heq, },
-  convert stupid,
-  norm_cast,
+  rw this,
+  simp [ring_norm_eq_padic_norm, ha],
+  have h₁ := nat.prime.ne_one hprime,
+  have h₂ : 0 < a.nat_abs := int.nat_abs_pos_of_ne_zero ha,
+  have h₃ : multiplicity p a.nat_abs = multiplicity (p : ℤ) a,
+  { sorry },
+  unfold padic_val_int,
+  unfold padic_val_nat,
+  simp [ha, h₁, h₂, h₃],
+  have arith : (f p) ^ m = (p ^ m)⁻¹ ^ (-real.log p / real.log (f p)),
+  { sorry },
+  exact arith,
 end
-
--- Get s: (f p)^m = (padic a)^s
---lemma get_s (harc : is_nonarchimedean f) (heq : mul_eq f) (h_nontriv : f ≠ 1) (a : ℤ)
---  (p : ℕ) [hp : fact (nat.prime p)] (m : ℕ) : 
---    ∃ s : ℝ, (f p)^m = (@ring_norm.padic p hp a)^s :=
---begin
-  
---  sorry
---end
 
 -- Extend this to ℚ using div_eq
 
