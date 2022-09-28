@@ -320,7 +320,15 @@ begin
   use p,
   split,
   { exact hp },
-  sorry,
+  {apply ideal.span_le.mpr,
+   intros ppr hp,
+   unfold 𝔞,
+   simp at hp,
+   simp,
+   rw hp, 
+   exact hbound,
+   }
+  
 end
 
 -- Show that it's in fact equal to pZ (since pZ is a maximal ideal)
@@ -334,6 +342,7 @@ begin
   have hp' := nat.prime_iff.mp hp,
   rw ←ideal.span_singleton_prime (nat.prime.ne_zero hp) at hp',
   sorry,
+  
 end
 
 -- Get s
