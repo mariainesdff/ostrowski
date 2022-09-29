@@ -395,7 +395,11 @@ begin
   { rw ha,
     have hs : s ≠ 0,
     { have fpneq1 : (f p) ≠ 1, -- prove this through p ∈ 𝔞 through h_aeq
-      { sorry },
+      { have p_mem_a : (p : ℤ) ∈ ideal.span ({p} : set ℤ) := by rw ideal.mem_span_singleton,
+        rw ←h_aeq at p_mem_a,
+        unfold 𝔞 at p_mem_a,
+        simp only [submodule.mem_mk, set.mem_set_of_eq, int.cast_coe_nat] at p_mem_a,
+        exact ne_of_lt p_mem_a },
       have hlogfp : real.log (f p) ≠ 0 := real.log_ne_zero_of_pos_of_ne_one fpgt0 fpneq1,
       exact div_ne_zero (neg_ne_zero.mpr hlogfp) hlogp },
     simp only [hs, int.cast_zero, map_zero, real.zero_rpow, ne.def, not_false_iff] },
