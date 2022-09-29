@@ -5,6 +5,7 @@ Authors: María Inés de Frutos-Fernández
 -/
 import number_theory.padics.padic_norm
 import basic
+import order.filter.basic
 
 open_locale big_operators
 
@@ -456,8 +457,18 @@ begin
   { simp only [finset.range_zero, finset.sum_empty, map_zero] },
   { rw finset.sum_range_succ,
     rw finset.sum_range_succ,
-    sorry }
+    calc f (∑ (x : ℕ) in finset.range n, ι x + ι n)
+        ≤ f (∑ i in finset.range n, ι i) + f (ι n) : f.add_le' _ _
+    ... ≤ (∑ i in finset.range n, f (ι i)) + f (ι n) : add_le_add_right hn _ }
 end
+
+--First limit
+lemma limit1 {N : ℝ} (hN : 1 ≤ N) : filter.tendsto (λ n : ℕ, N ^ (1 / n)) filter.at_top (nhds 1) :=
+sorry
+
+--Second limit
+lemma limit2 {c : ℝ} (hc : 0 ≤ c) : filter.tendsto (λ n : ℕ, (1 + (n : ℝ)*c)^(1 / n)) filter.at_top (nhds 1) :=
+sorry
 
 -- A norm is non-archimedean iff it's bounded on the naturals
 lemma non_archimidean_iff_nat_norm_bound (hmul : mul_eq f) : (∀ n : ℕ, f n ≤ 1) ↔ is_nonarchimedean f :=
