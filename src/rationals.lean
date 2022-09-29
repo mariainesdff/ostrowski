@@ -287,7 +287,7 @@ def 𝔞 (harc : is_nonarchimedean f) (heq : mul_eq f) : ideal ℤ :=
 { carrier := {a : ℤ | f a < 1},
   add_mem' := begin
      intros a b ha hb,
-     simp,
+     simp only [set.mem_set_of_eq, int.cast_add],
      have : max (f a) (f b) < 1 := max_lt ha hb,
      linarith [harc a b]
   end,
@@ -299,7 +299,7 @@ def 𝔞 (harc : is_nonarchimedean f) (heq : mul_eq f) : ideal ℤ :=
   smul_mem' := begin
     intros a b hb,
     change f (↑(a * b)) < 1,
-    simp,
+    simp only [int.cast_mul],
     rw heq,
     exact mul_lt_of_le_of_lt_one' (int_norm_le_one a heq harc) hb (map_nonneg f b) zero_lt_one,
   end }
@@ -395,7 +395,7 @@ begin
     { have p_mem_a : (p : ℤ) ∈ ideal.span ({p} : set ℤ) := by rw ideal.mem_span_singleton,
       rw ←h_aeq at p_mem_a,
       unfold 𝔞 at p_mem_a,
-      simp at p_mem_a,
+      simp only [submodule.mem_mk, set.mem_set_of_eq, int.cast_coe_nat] at p_mem_a,
       exact p_mem_a },
     have hlogfp : real.log (f p) < 0 := (real.log_neg_iff fpgt0).mpr fp_lt_one,
     exact div_pos (neg_pos.mpr hlogfp) hlogp },
@@ -403,7 +403,7 @@ begin
   intro a,
   by_cases ha : a = 0,
   { rw ha,
-    simp [hs],
+    simp only [int.cast_zero, map_zero],
     have hs' : s ≠ 0 := norm_num.ne_zero_of_pos s hs,
     exact (real.zero_rpow hs').symm },
   have hfin := mult_finite hp ha,
