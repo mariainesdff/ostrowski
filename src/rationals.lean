@@ -409,7 +409,9 @@ begin
   intro a,
   by_cases ha : a = 0,
   { rw ha,
-    simp only [hs, int.cast_zero, map_zero, real.zero_rpow, ne.def, not_false_iff] },
+    simp [hs],
+    have hs' : s ≠ 0 := norm_num.ne_zero_of_pos s hs,
+    exact (real.zero_rpow hs').symm },
   have hfin := mult_finite hprime ha,
   obtain ⟨b, hapb, hndiv⟩ := multiplicity.exists_eq_pow_mul_and_not_dvd hfin,
   let m := (multiplicity (p : ℤ) a).get hfin,
@@ -498,6 +500,8 @@ begin
   unfold ring_norm.padic,
   simp only [map_nonneg]
 end
+
+end non_archimedean
 
 section archimedean
 --Sum inequality
