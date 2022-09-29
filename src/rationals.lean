@@ -426,13 +426,11 @@ begin
   rw this,
   simp [ring_norm_eq_padic_norm, ha],
   unfold padic_val_int padic_val_nat,
-  have mult_abs : multiplicity p a.nat_abs = multiplicity (p : ℤ) a,
-  { sorry },
-  simp [ha, hprime.ne_one, int.nat_abs_pos_of_ne_zero ha, mult_abs],
+  simp [ha, hprime.ne_one, int.nat_abs_pos_of_ne_zero ha, multiplicity.int.nat_abs p a],
   have hppos : (p : ℝ) > 0 := nat.cast_pos.mpr (hprime.pos),
   exact arithmetic m hppos hlogp fpgt0,
 end
-
+#check multiplicity.int.nat_abs
 -- Extend this to ℚ using div_eq
 
 -- Finish: hence f and padic are equivalent
