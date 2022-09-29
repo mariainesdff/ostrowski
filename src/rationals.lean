@@ -502,9 +502,9 @@ begin
 end
 
 --First limit
-lemma limit1 {N : ℝ} (hN : 1 ≤ N) : filter.tendsto (λ n : ℕ, N ^ (1 / (n : ℝ))) filter.at_top (nhds 1) :=
+lemma limit1 {N : ℝ} (hN : 0 < N) : filter.tendsto (λ n : ℕ, N ^ (1 / (n : ℝ))) filter.at_top (nhds 1) :=
 begin
-  rw ←real.exp_log (lt_of_lt_of_le zero_lt_one hN),
+  rw ←real.exp_log hN,
   simp_rw [←real.exp_mul],
   refine real.tendsto_exp_nhds_0_nhds_1.comp _,
   simp_rw [mul_one_div],
@@ -513,7 +513,9 @@ end
 
 --Second limit
 lemma limit2 {c : ℝ} (hc : 0 ≤ c) : filter.tendsto (λ n : ℕ, (1 + (n : ℝ)*c)^(1 / n)) filter.at_top (nhds 1) :=
-sorry
+begin
+
+end
 
 -- A norm is non-archimedean iff it's bounded on the naturals
 lemma non_archimidean_iff_nat_norm_bound (hmul : mul_eq f) : (∀ n : ℕ, f n ≤ 1) ↔ is_nonarchimedean f :=
