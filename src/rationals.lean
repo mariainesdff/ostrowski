@@ -512,16 +512,44 @@ begin
 end
 
 --Second limit
-lemma limit2 {c : ℝ} (hc : 0 ≤ c) : filter.tendsto (λ n : ℕ, (1 + (n : ℝ)*c)^(1 / n)) filter.at_top (nhds 1) :=
+lemma limit2 {c : ℝ} (hc : 0 < c) : filter.tendsto (λ n : ℕ, (1 + (n : ℝ)*c)^(1 / (n : ℝ))) filter.at_top (nhds 1) :=
 begin
-
+  sorry
 end
+
+--Potentially useful
+example {c : ℝ} (hc : 0 < c) : filter.tendsto (λ x : ℝ, x^(1 /x)) filter.at_top (nhds 1) →
+  filter.tendsto (λ n : ℕ, ((n : ℝ))^(1 / (n : ℝ))) filter.at_top (nhds 1) :=
+begin
+  have hf : (λ n : ℕ, (n : ℝ)^(1 / (n : ℝ))) = λ n : ℕ, (((λ x : ℝ, x^(1 / x)) ∘ coe) n) := sorry,
+  intro h,
+  rw hf,
+  apply filter.tendsto.comp _ tendsto_coe_nat_at_top_at_top,
+  exact h,
+  apply_instance,
+end
+
 
 -- A norm is non-archimedean iff it's bounded on the naturals
 lemma non_archimidean_iff_nat_norm_bound (hmul : mul_eq f) : (∀ n : ℕ, f n ≤ 1) ↔ is_nonarchimedean f :=
 begin
   split,
-  { sorry },
+  { intros H x y,
+    have max_ineq : ∀ m n : ℕ, (f x)^m * (f y)^n ≤ (max (f x) (f y))^(m+n),
+    { intros m n,
+      rw pow_add,
+      apply mul_le_mul,
+      { apply pow_le_pow_of_le_left (map_nonneg f _) (le_max_left (f x) (f y)) },
+      { apply pow_le_pow_of_le_left (map_nonneg f _) (le_max_right (f x) (f y)) },
+      { apply pow_nonneg,
+        exact (map_nonneg f _) },
+      { apply pow_nonneg,
+        rw le_max_iff,
+        left,
+        exact (map_nonneg f _) } },
+    have inter_ineq : ∀ n : ℕ, (f (x + y))^n ≤ (n+1 : ℝ) * (max (f x) (f y))^n,
+    { intro n,
+      rw ←(mul_eq_pow hmul), } },
   { intros hf n,
     exact nat_norm_leq_one n hmul hf }
 end
