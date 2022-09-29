@@ -349,11 +349,11 @@ begin
   exact hmax.eq_of_le (a_proper harc heq) hinc,
 end
 
-lemma mult_finite {a : ℤ} {p : ℕ} (hprime : nat.prime p) (ha : a ≠ 0) :
+lemma mult_finite {a : ℤ} {p : ℕ} (hp : nat.prime p) (ha : a ≠ 0) :
   multiplicity.finite (p : ℤ) a :=
 begin
   apply multiplicity.finite_int_iff.mpr,
-  simp only [ha, hprime.ne_one, int.nat_abs_of_nat, ne.def, not_false_iff, and_self],
+  simp only [ha, hp.ne_one, int.nat_abs_of_nat, ne.def, not_false_iff, and_self],
 end
 
 lemma mul_eq_pow (heq : mul_eq f) {a : ℚ} {n : ℕ} : f (a ^ n) = (f a) ^ n :=
@@ -365,7 +365,7 @@ begin
 end
 
 -- the equality at the end of the next lemma
-lemma arithmetic {p v : ℝ} (m : ℕ) (hp : p > 0) (hlogp : real.log p ≠ 0) (hv : v > 0) : v ^ m = (p ^ m)⁻¹ ^ (-real.log v / real.log p) :=
+lemma rearrange {p v : ℝ} (m : ℕ) (hp : p > 0) (hlogp : real.log p ≠ 0) (hv : v > 0) : v ^ m = (p ^ m)⁻¹ ^ (-real.log v / real.log p) :=
 begin
   rw ←real.rpow_neg_one,
   have : p ^ m = p ^ (m : ℝ) := by norm_cast,
@@ -382,18 +382,13 @@ end
 lemma int_val_eq (harc : is_nonarchimedean f) (heq : mul_eq f) (h_nontriv : f ≠ 1) :
   ∃ (p : ℕ) [hp : fact (nat.prime p)] (s : ℝ) [hs : s > 0], ∀ (a : ℤ), f a = (@ring_norm.padic p hp a)^s :=
 begin
-  obtain ⟨p, hprime, h_aeq⟩ := a_eq_prime_ideal harc heq h_nontriv,
-  use p,
-  use hprime,
-  cases hprime,
-  have pneq0 : (p : ℚ) ≠ 0 := nat.cast_ne_zero.mpr (ne_of_gt (nat.prime.pos hprime)),
-  have fpgt0 := @norm_pos_of_ne_zero f _ pneq0,
-  have hp' : (p : ℝ) > 1,
-  { exact_mod_cast hprime.one_lt },
-  have hlogp : real.log p ≠ 0 := real.log_ne_zero_of_pos_of_ne_one
-    (nat.cast_pos.mpr hprime.pos)
-    (nat.cast_ne_one.mpr hprime.ne_one),
-  have hlogp' : real.log p > 0 := real.log_pos hp',
+  obtain ⟨p, hp, h_aeq⟩ := a_eq_prime_ideal harc heq h_nontriv,
+  use [p, hp],
+  cases hp,
+  have fpgt0 := @norm_pos_of_ne_zero f _ (nat.cast_ne_zero.mpr (ne_of_gt hp.pos)),
+  have hpgt1 : (p : ℝ) > 1,
+  { exact_mod_cast hp.one_lt },
+  have hlogp : real.log p > 0 := real.log_pos hpgt1,
   let s := (-real.log (f p : ℝ) / real.log p),
   have hs : s > 0,
   { have fp_lt_one : (f p) < 1, -- prove this through p ∈ 𝔞 through h_aeq
@@ -403,16 +398,15 @@ begin
       simp at p_mem_a,
       exact p_mem_a },
     have hlogfp : real.log (f p) < 0 := (real.log_neg_iff fpgt0).mpr fp_lt_one,
-    exact div_pos (neg_pos.mpr hlogfp) hlogp' },
-  use s,
-  use hs,
+    exact div_pos (neg_pos.mpr hlogfp) hlogp },
+  use [s, hs],
   intro a,
   by_cases ha : a = 0,
   { rw ha,
     simp [hs],
     have hs' : s ≠ 0 := norm_num.ne_zero_of_pos s hs,
     exact (real.zero_rpow hs').symm },
-  have hfin := mult_finite hprime ha,
+  have hfin := mult_finite hp ha,
   obtain ⟨b, hapb, hndiv⟩ := multiplicity.exists_eq_pow_mul_and_not_dvd hfin,
   let m := (multiplicity (p : ℤ) a).get hfin,
   have : f a = (f p) ^ m,
@@ -439,9 +433,9 @@ begin
   rw this,
   simp [ring_norm_eq_padic_norm, ha],
   unfold padic_val_int padic_val_nat,
-  simp [ha, hprime.ne_one, int.nat_abs_pos_of_ne_zero ha, multiplicity.int.nat_abs p a],
-  have hppos : (p : ℝ) > 0 := nat.cast_pos.mpr (hprime.pos),
-  exact arithmetic m hppos hlogp fpgt0,
+  simp [ha, hp.ne_one, int.nat_abs_pos_of_ne_zero ha, multiplicity.int.nat_abs p a],
+  have hppos : (p : ℝ) > 0 := nat.cast_pos.mpr (hp.pos),
+  exact rearrange m hppos (norm_num.ne_zero_of_pos _ hlogp) fpgt0,
 end
 
 lemma cast_pow_sub (r : ℝ) (a b : ℤ) : r ^ (a - b) = r ^ ((a : ℝ) - (b : ℝ)) := by norm_cast
@@ -453,18 +447,14 @@ lemma rat_val_eq (harc : is_nonarchimedean f) (heq : mul_eq f) (h_nontriv : f �
   ∃ (p : ℕ) [hp : fact (nat.prime p)] (s : ℝ) (hs : s > 0), ∀ (a : ℚ), f a = (@ring_norm.padic p hp a)^s :=
 begin
   obtain ⟨p, hp, s, hs, h_int⟩ := int_val_eq harc heq h_nontriv,
-  use p,
-  use hp,
-  use s,
-  use hs,
+  use [p, hp, s, hs],
   intro a,
   by_cases ha : a = 0,
   { rw [ha, map_zero, map_zero],
     have hs' : s ≠ 0 := norm_num.ne_zero_of_pos s hs,
     exact (real.zero_rpow hs').symm },
-  rw [←rat.num_div_denom a, ring_norm.div_eq heq, h_int],
-  have : f (a.denom) = (@ring_norm.padic p hp a.denom) ^ s := h_int a.denom,
-  rw this,
+  have hcast : f (a.denom) = (@ring_norm.padic p hp a.denom) ^ s := h_int a.denom,
+  rw [←rat.num_div_denom a, ring_norm.div_eq heq, h_int, hcast],
   simp [ha],
   unfold padic_val_rat,
   rw [cast_pow_sub, real.rpow_sub],
@@ -474,10 +464,11 @@ begin
   simp only [inv_div_inv],
   rw ←real.div_rpow,
   repeat {
+    -- fact hp --> hp
     cases hp,
     rw cast_pow,
-    refine real.rpow_nonneg_of_nonneg _ _,
-    exact le_of_lt (nat.cast_pos.mpr hp.pos) },
+    exact real.rpow_nonneg_of_nonneg (le_of_lt (nat.cast_pos.mpr hp.pos)) _
+  },
   cases hp,
   exact (nat.cast_pos.mpr hp.pos),
   norm_cast,
@@ -489,13 +480,10 @@ lemma f_equiv_padic (harc : is_nonarchimedean f) (heq : mul_eq f) (h_nontriv : f
  ∃ (p : ℕ) [hp : fact (nat.prime p)], ring_norm.equiv f (@ring_norm.padic p hp) :=
 begin
   obtain ⟨p, hp, s, hs, h⟩ := rat_val_eq harc heq h_nontriv,
-  use p,
-  use hp,
-  use 1 / s,
+  use [p, hp, 1 / s],
   refine ⟨one_div_pos.mpr hs, _⟩,
   ext a,
-  rw h,
-  rw ←real.rpow_mul,
+  rw [h, ←real.rpow_mul],
   simp [norm_num.ne_zero_of_pos s hs],
   unfold ring_norm.padic,
   simp only [map_nonneg]
