@@ -6,6 +6,8 @@ Authors: María Inés de Frutos-Fernández
 import number_theory.padics.padic_norm
 import basic
 
+open_locale big_operators
+
 /-!
 # Ostrowski's theorem for ℚ
 
@@ -362,6 +364,25 @@ sorry
 end non_archimedean
 
 section archimedean
+--Sum inequality
+lemma Sum_le (n : ℕ) (ι : ℕ → ℚ) : f (∑ i in finset.range n, ι i) ≤ ∑ i in finset.range n, f (ι i) :=
+begin
+  induction n with n hn,
+  { simp only [finset.range_zero, finset.sum_empty, map_zero] },
+  { rw finset.sum_range_succ,
+    rw finset.sum_range_succ,
+    sorry }
+end
+
+-- A norm is non-archimedean iff it's bounded on the naturals
+lemma non_archimidean_iff_nat_norm_bound (hmul : mul_eq f) : (∀ n : ℕ, f n ≤ 1) ↔ is_nonarchimedean f :=
+begin
+  split,
+  { sorry },
+  { intros hf n,
+    exact nat_norm_leq_one n hmul hf }
+end
+
 
 end archimedean
 
