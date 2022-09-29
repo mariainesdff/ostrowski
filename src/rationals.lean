@@ -119,7 +119,7 @@ end
 
 section non_archimedean
 
-lemma nat_norm_leq_one (n : ℕ) (heq : mul_eq f) (harc : is_nonarchimedean f) : f n ≤ 1 :=
+lemma nat_norm_le_one (n : ℕ) (heq : mul_eq f) (harc : is_nonarchimedean f) : f n ≤ 1 :=
 begin
   induction n with c hc,
   { simp only [nat.cast_zero, map_zero, zero_le_one], },
@@ -130,15 +130,22 @@ begin
     exact le_trans harc (max_le hc rfl.ge), },
 end
 
-lemma int_norm_le_one (z : ℤ) (heq : mul_eq f) (harc : is_nonarchimedean f) : f z ≤ 1 :=
+lemma int_norm_bound_iff_nat_norm_bound (heq : mul_eq f) : (∀ n : ℕ, f n ≤ 1) ↔ (∀ z : ℤ, f z ≤ 1) :=
 begin
-  obtain ⟨n, rfl | rfl⟩ := z.eq_coe_or_neg,
-  { exact nat_norm_leq_one n heq harc },
-  { have : ↑((-1 : ℤ) * n) = (-1 : ℚ) * n := by norm_cast,
-    rw [neg_eq_neg_one_mul, this, heq, norm_neg_one_eq_one heq, one_mul],
-    exact nat_norm_leq_one n heq harc,
-  },
+  split,
+  { intros h z,
+    obtain ⟨n, rfl | rfl⟩ := z.eq_coe_or_neg,
+    { exact h n },
+    { have : ↑((-1 : ℤ) * n) = (-1 : ℚ) * n := by norm_cast,
+      rw [neg_eq_neg_one_mul, this, heq, norm_neg_one_eq_one heq, one_mul],
+      exact h n } },
+  { intros h n,
+    exact_mod_cast (h n) },
 end
+
+lemma int_norm_le_one (z : ℤ) (heq : mul_eq f) (harc : is_nonarchimedean f) : f z ≤ 1 :=
+(int_norm_bound_iff_nat_norm_bound heq).mp (λ n, nat_norm_le_one n heq harc) z
+
 -- Proof strategy:
 
 -- Prove nontrivial on ℚ implies nontrivial on ℕ
@@ -149,7 +156,7 @@ begin
   have hfnateq1 : ∀ n : ℕ, n ≠ 0 → f n = 1,
   { intros n hnneq0,
     specialize hfnge1 n hnneq0,
-    have := nat_norm_leq_one n hf_mul harc,
+    have := nat_norm_le_one n hf_mul harc,
     linarith },
   ext,
   by_cases h : x = 0,
@@ -523,12 +530,9 @@ end
 -- A norm is non-archimedean iff it's bounded on the naturals
 lemma non_archimidean_iff_nat_norm_bound (hmul : mul_eq f) : (∀ n : ℕ, f n ≤ 1) ↔ is_nonarchimedean f :=
 begin
-  split,
-  { sorry },
-  { intros hf n,
-    exact nat_norm_leq_one n hmul hf }
+  refine ⟨_, λ hf n, nat_norm_le_one n hmul hf⟩,
+  sorry,
 end
-
 
 end archimedean
 
@@ -538,6 +542,8 @@ theorem rat_ring_norm_p_adic_or_real (f : ring_norm ℚ) (hf_nontriv : f ≠ 1) 
   ∃ (p : ℕ) [hp : fact (nat.prime p)], ring_norm.equiv f (@ring_norm.padic p hp) :=
 begin
     by_cases bdd : ∀ z : ℤ, f z ≤ 1,
-    { sorry /- p-adic case -/ },
+    { right, /- p-adic case -/
+      rw [←int_norm_bound_iff_nat_norm_bound hf_mul, non_archimidean_iff_nat_norm_bound hf_mul] at bdd,
+      exact f_equiv_padic bdd hf_mul hf_nontriv },
     { sorry /- Euclidean case -/ }
 end
