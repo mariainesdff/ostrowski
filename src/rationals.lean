@@ -434,7 +434,7 @@ begin
   have hppos : (p : ℝ) > 0 := nat.cast_pos.mpr (hprime.pos),
   exact arithmetic m hppos hlogp fpgt0,
 end
-#check multiplicity.int.nat_abs
+
 -- Extend this to ℚ using div_eq
 
 -- Finish: hence f and padic are equivalent
