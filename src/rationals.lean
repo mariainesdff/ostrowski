@@ -101,6 +101,9 @@ begin
     contradiction },
 end
 
+lemma norm_pos_of_ne_zero {x : ℚ} (h : x ≠ 0) : f x > 0 :=
+lt_of_le_of_ne (map_nonneg f x) (λ h', h (f.eq_zero_of_map_eq_zero' x h'.symm))
+
 --TODO: generalise to division rings, get rid of field_simp
 lemma ring_norm.div_eq (h : mul_eq f) (p : ℚ) {q : ℚ} (hq : q ≠ 0) : f (p / q) = (f p) / (f q) :=
 begin
@@ -320,17 +323,14 @@ lemma a_contains_prime_ideal (harc : is_nonarchimedean f) (heq : mul_eq f) (h_no
 begin
   obtain ⟨p, hp, hbound⟩ := ex_prime_norm_lt_one heq harc h_nontriv,
   use p,
-  split,
-  { exact hp },
-  {apply ideal.span_le.mpr,
-   intros ppr hp,
-   unfold 𝔞,
-   simp at hp,
-   simp,
-   rw hp, 
-   exact hbound,
-   }
-  
+  split, { exact hp },
+  { apply ideal.span_le.mpr,
+    intros ppr hp,
+    unfold 𝔞,
+    simp only [set.mem_singleton_iff] at hp,
+    simp only [submodule.coe_set_mk, set.mem_set_of_eq],
+    rw hp,
+    exact hbound }
 end
 
 -- Show that it's in fact equal to pZ (since pZ is a maximal ideal)
@@ -348,18 +348,103 @@ begin
   exact hmax.eq_of_le (a_proper harc heq) hinc,
 end
 
--- f a = (f p)^m
-lemma a_val_eq (harc : is_nonarchimedean f) (heq : mul_eq f) (h_nontriv : f ≠ 1) (a : ℤ) :
-  ∃ (p : ℕ) [hp : fact (nat.prime p)] (m : ℕ), f a = (f p)^m :=
-sorry
+lemma mult_finite {a : ℤ} {p : ℕ} (hprime : nat.prime p) (ha : a ≠ 0) :
+  multiplicity.finite (p : ℤ) a :=
+begin
+  apply multiplicity.finite_int_iff.mpr,
+  simp only [ha, hprime.ne_one, int.nat_abs_of_nat, ne.def, not_false_iff, and_self],
+end
 
--- Get s: (f p)^m = (padic a)^s
+lemma mul_eq_pow (heq : mul_eq f) {a : ℚ} {n : ℕ} : f (a ^ n) = (f a) ^ n :=
+begin
+  induction n with d hd,
+  simp only [pow_zero],
+  exact norm_one_eq_one heq,
+  rw [pow_succ, pow_succ, ←hd, heq],
+end
+
+-- the equality at the end of the next lemma
+lemma arithmetic {p v : ℝ} (m : ℕ) (hp : p > 0) (hlogp : real.log p ≠ 0) (hv : v > 0) : v ^ m = (p ^ m)⁻¹ ^ (-real.log v / real.log p) :=
+begin
+  rw ←real.rpow_neg_one,
+  have : p ^ m = p ^ (m : ℝ) := by norm_cast,
+  rw [this, ←(real.rpow_mul (le_of_lt hp)), ←(real.rpow_mul (le_of_lt hp)), neg_div],
+  simp only [mul_neg, mul_one, neg_mul, neg_neg],
+  rw [mul_div, ←real.log_rpow hv, real.rpow_def_of_pos hp, mul_div_left_comm,
+    div_self hlogp, mul_one, real.exp_log],
+  { norm_cast },
+  norm_cast,
+  exact pow_pos hv m,
+end
+
+-- f a = (f p)^m = ring_norm a
+lemma int_val_eq (harc : is_nonarchimedean f) (heq : mul_eq f) (h_nontriv : f ≠ 1) :
+  ∃ (p : ℕ) [hp : fact (nat.prime p)] (s : ℝ), ∀ (a : ℤ), f a = (@ring_norm.padic p hp a)^s :=
+begin
+  obtain ⟨p, hprime, h_aeq⟩ := a_eq_prime_ideal harc heq h_nontriv,
+  use p,
+  use hprime,
+  cases hprime,
+  have pneq0 : (p : ℚ) ≠ 0 := nat.cast_ne_zero.mpr (ne_of_gt (nat.prime.pos hprime)),
+  have fpgt0 := norm_pos_of_ne_zero pneq0,
+  have hlogp : real.log p ≠ 0 := real.log_ne_zero_of_pos_of_ne_one
+    (nat.cast_pos.mpr (nat.prime.pos hprime))
+    (nat.cast_ne_one.mpr (nat.prime.ne_one hprime)),
+  let s := (-real.log (f p : ℝ) / real.log p),
+  use s,
+  intro a,
+  by_cases ha : a = 0,
+  { rw ha,
+    have hs : s ≠ 0,
+    { have fpneq1 : (f p) ≠ 1, -- prove this through p ∈ 𝔞 through h_aeq
+      { have p_mem_a : (p : ℤ) ∈ ideal.span ({p} : set ℤ) := by rw ideal.mem_span_singleton,
+        rw ←h_aeq at p_mem_a,
+        unfold 𝔞 at p_mem_a,
+        simp only [submodule.mem_mk, set.mem_set_of_eq, int.cast_coe_nat] at p_mem_a,
+        exact ne_of_lt p_mem_a },
+      have hlogfp : real.log (f p) ≠ 0 := real.log_ne_zero_of_pos_of_ne_one fpgt0 fpneq1,
+      exact div_ne_zero (neg_ne_zero.mpr hlogfp) hlogp },
+    simp only [hs, int.cast_zero, map_zero, real.zero_rpow, ne.def, not_false_iff] },
+  have hfin := mult_finite hprime ha,
+  obtain ⟨b, hapb, hndiv⟩ := multiplicity.exists_eq_pow_mul_and_not_dvd hfin,
+  let m := (multiplicity (p : ℤ) a).get hfin,
+  have : f a = (f p) ^ m,
+  { rw hapb,
+    have hb : ↑b ∉ 𝔞 harc heq,
+    { rw h_aeq,
+      intro hmem,
+      rw ideal.mem_span_singleton' at hmem,
+      obtain ⟨k, hk⟩ := hmem,
+      apply hndiv,
+      rw dvd_iff_exists_eq_mul_left,
+      use k,
+      exact hk.symm },
+    unfold 𝔞 at hb,
+    simp only [int.cast_id, submodule.mem_mk, set.mem_set_of_eq, not_lt] at hb,
+    have h' : f b = 1 := le_antisymm (int_norm_le_one b heq harc) hb,
+    have h'' : f ((p : ℚ) ^ m * (b : ℚ)) = (f (p : ℚ)) ^ m,
+    { rw [heq, h'],
+      rw mul_one,
+      exact mul_eq_pow heq },
+    convert h'',
+    norm_cast,
+  },
+  rw this,
+  simp [ring_norm_eq_padic_norm, ha],
+  unfold padic_val_int padic_val_nat,
+  simp [ha, hprime.ne_one, int.nat_abs_pos_of_ne_zero ha, multiplicity.int.nat_abs p a],
+  have hppos : (p : ℝ) > 0 := nat.cast_pos.mpr (hprime.pos),
+  exact arithmetic m hppos hlogp fpgt0,
+end
 
 -- Extend this to ℚ using div_eq
 
 -- Finish: hence f and padic are equivalent
-
-
+lemma f_equiv_padic (harc : is_nonarchimedean f) (heq : mul_eq f) (h_nontriv : f ≠ 1) : 
+ ∃ (p : ℕ) [hp : fact (nat.prime p)], ring_norm.equiv f (@ring_norm.padic p hp) :=
+begin
+sorry,
+end
 
 end non_archimedean
 
