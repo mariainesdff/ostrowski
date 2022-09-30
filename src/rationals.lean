@@ -566,7 +566,7 @@ begin
       suffices goal_1 : ∑ (i : ℕ) in finset.range (n + 1), f (x ^ i * y ^ (n - i) * (n.choose i))
         = ∑ (i : ℕ) in finset.range (n + 1), f (x ^ i) *  f (y ^ (n - i)) * f (n.choose i),
       { rw goal_1,
-
+        clear goal_1,
         sorry},
       congr',
       ext,
