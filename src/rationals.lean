@@ -528,17 +528,15 @@ begin
 end
 
 --Potentially useful
-example {c : ℝ} (hc : 0 < c) : filter.tendsto (λ x : ℝ, x^(1 /x)) filter.at_top (nhds 1) →
-  filter.tendsto (λ n : ℕ, ((n : ℝ))^(1 / (n : ℝ))) filter.at_top (nhds 1) :=
+example {c : ℝ} (hc : 0 < c) : filter.tendsto (λ n : ℕ, ((n : ℝ))^(1 / (n : ℝ))) filter.at_top (nhds 1) :=
 begin
-  have hf : (λ n : ℕ, (n : ℝ)^(1 / (n : ℝ))) = λ n : ℕ, (((λ x : ℝ, x^(1 / x)) ∘ coe) n) := sorry,
-  intro h,
+  have hf : (λ n : ℕ, (n : ℝ)^(1 / (n : ℝ))) = λ n : ℕ, (((λ x : ℝ, x^(1 / x)) ∘ coe) n),
+  { ext, simp only [eq_self_iff_true] },
   rw hf,
   apply filter.tendsto.comp _ tendsto_coe_nat_at_top_at_top,
-  exact h,
+  exact tendsto_rpow_div,
   apply_instance,
 end
-
 
 -- A norm is non-archimedean iff it's bounded on the naturals
 lemma non_archimidean_iff_nat_norm_bound (hmul : mul_eq f) : (∀ n : ℕ, f n ≤ 1) ↔ is_nonarchimedean f :=
