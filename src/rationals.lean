@@ -559,9 +559,9 @@ begin
         exact (map_nonneg f _) } },
     have inter_ineq : ∀ n : ℕ, (f (x + y))^n ≤ (n+1 : ℝ) * (max (f x) (f y))^n,
     { intro n,
-      rw ←(mul_eq_pow hmul), } },
+      rw ←(mul_eq_pow hmul), sorry }, sorry },
   { intros hf n,
-    exact nat_norm_leq_one n hmul hf }
+    exact nat_norm_le_one n hmul hf }
 end
 
 end archimedean
