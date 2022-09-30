@@ -557,9 +557,24 @@ begin
         rw le_max_iff,
         left,
         exact (map_nonneg f _) } },
-    have inter_ineq : ∀ n : ℕ, (f (x + y))^n ≤ (n+1 : ℝ) * (max (f x) (f y))^n,
+    have inter_ineq : ∀ n : ℕ, (f (x + y))^(n : ℝ) ≤ (n+1 : ℝ) * (max (f x) (f y))^(n : ℝ),
     { intro n,
-      rw ←(mul_eq_pow hmul), sorry }, sorry },
+      norm_cast,
+      rw ←(mul_eq_pow hmul),
+      rw add_pow,
+      apply le_trans (Sum_le (n + 1) _),
+      suffices goal_1 : ∑ (i : ℕ) in finset.range (n + 1), f (x ^ i * y ^ (n - i) * (n.choose i))
+        = ∑ (i : ℕ) in finset.range (n + 1), f (x ^ i) *  f (y ^ (n - i)) * f (n.choose i),
+      { rw goal_1,
+
+        sorry},
+      congr',
+      ext,
+      rw hmul,
+      rw hmul, }, 
+    
+
+    sorry },
   { intros hf n,
     exact nat_norm_le_one n hmul hf }
 end
