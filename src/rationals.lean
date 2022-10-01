@@ -574,16 +574,43 @@ begin
        apply le_trans (Sum_le (n + 1) _),
        suffices goal_1 : ∑ (i : ℕ) in finset.range (n + 1), f (x ^ i * y ^ (n - i) * (n.choose i))
          = ∑ (i : ℕ) in finset.range (n + 1), f (x ^ i) *  f (y ^ (n - i)) * f (n.choose i),
-       { rw goal_1,
-          clear goal_1,
-         sorry},
-       congr',
-       ext,
-       rw hmul,
-       rw hmul, }, 
-
-
-     sorry },
+      { rw goal_1,
+        clear goal_1,
+        calc ∑ (i : ℕ) in finset.range (n + 1), f (x ^ i) * f (y ^ (n - i)) * f (n.choose i)
+            ≤ ∑ (i : ℕ) in finset.range (n + 1), f (x ^ i) * f (y ^ (n - i)) :
+              begin
+                apply finset.sum_le_sum,
+                intros i hi,
+                conv {
+                  to_rhs,
+                  rw ←mul_one (f (x ^ i) * f (y ^ (n - i))),
+                },
+                apply mul_le_mul_of_nonneg_left,
+                { exact H _ },
+                { exact mul_nonneg (map_nonneg f _) (map_nonneg f _) }
+              end
+        ... ≤ ∑ (i : ℕ) in finset.range (n + 1), (max (f x) (f y))^n : 
+              begin
+                apply finset.sum_le_sum,
+                intros i hi,
+                have aux : i + (n - i) = n,
+                { rw add_comm,
+                  apply nat.sub_add_cancel,
+                  simp at hi,
+                  linarith },
+                conv { to_rhs, rw ←aux, },
+                repeat { rw mul_eq_pow hmul },
+                exact max_ineq i (n-i)
+              end
+        ... = ↑(n + 1) * max (f x) (f y) ^ n : by simp, },
+      congr',
+      ext,
+      rw hmul,
+      rw hmul, }, 
+    have root_ineq : ∀ n : ℕ, f (x + y) ≤ (n + 1 : ℝ)^(1/(n : ℝ)) * (max (f x) (f y)),
+    { intro n,
+      library_search, },
+    sorry },
   { intros hf n,
     exact nat_norm_le_one n hmul hf }
 end
