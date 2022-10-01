@@ -524,7 +524,18 @@ end
 --Second limit
 lemma limit2 {c : ℝ} (hc : 0 < c) : filter.tendsto (λ n : ℕ, (1 + (n : ℝ)*c)^(1 / (n : ℝ))) filter.at_top (nhds 1) :=
 begin
-  sorry
+  have cne0 : c ≠ 0 := ne_of_gt hc, 
+  have : (λ n : ℕ, (1+(n : ℝ)*c)^(1 / (n : ℝ))) = (λ (x : ℝ), x ^ (1 / ((1 / c) * x  + (- 1) / c))) ∘ (λ y : ℝ, 1 + c*y) ∘ coe,
+  { ext n, simp, rw mul_add, rw ←mul_assoc, simp, rw div_eq_mul_inv, rw add_comm c⁻¹, rw add_assoc, rw [neg_mul, one_mul, add_right_neg, add_zero, inv_mul_cancel cne0, one_mul, mul_comm] },
+  rw this,
+  have : 1 / c ≠ 0 := one_div_ne_zero cne0,
+  refine (tendsto_rpow_div_mul_add 1 (1 / c) (-1 / c) this.symm).comp _,
+  have : filter.tendsto (λ y : ℝ, 1 + c*y) filter.at_top filter.at_top,
+  { apply filter.tendsto_at_top_add_const_left,
+    apply filter.tendsto.const_mul_at_top hc,
+    intros x hx,
+    exact hx },
+  exact this.comp tendsto_coe_nat_at_top_at_top
 end
 
 --Potentially useful
@@ -555,24 +566,24 @@ begin
         rw le_max_iff,
         left,
         exact (map_nonneg f _) } },
-    have inter_ineq : ∀ n : ℕ, (f (x + y))^(n : ℝ) ≤ (n+1 : ℝ) * (max (f x) (f y))^(n : ℝ),
+    have inter_ineq : ∀ n : ℕ, (f (x + y))^(n : ℝ) ≤ (n+1 : ℝ) * (max (f x) (f y))^n,
     { intro n,
       norm_cast,
-      rw ←(mul_eq_pow hmul),
-      rw add_pow,
-      apply le_trans (Sum_le (n + 1) _),
-      suffices goal_1 : ∑ (i : ℕ) in finset.range (n + 1), f (x ^ i * y ^ (n - i) * (n.choose i))
-        = ∑ (i : ℕ) in finset.range (n + 1), f (x ^ i) *  f (y ^ (n - i)) * f (n.choose i),
-      { rw goal_1,
-        clear goal_1,
-        sorry},
-      congr',
-      ext,
-      rw hmul,
-      rw hmul, }, 
-    
+       rw ←(mul_eq_pow hmul),
+       rw add_pow,
+       apply le_trans (Sum_le (n + 1) _),
+       suffices goal_1 : ∑ (i : ℕ) in finset.range (n + 1), f (x ^ i * y ^ (n - i) * (n.choose i))
+         = ∑ (i : ℕ) in finset.range (n + 1), f (x ^ i) *  f (y ^ (n - i)) * f (n.choose i),
+       { rw goal_1,
+          clear goal_1,
+         sorry},
+       congr',
+       ext,
+       rw hmul,
+       rw hmul, }, 
 
-    sorry },
+
+     sorry },
   { intros hf n,
     exact nat_norm_le_one n hmul hf }
 end
