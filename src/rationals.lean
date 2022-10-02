@@ -632,7 +632,12 @@ begin
       { ext k,
         simp,
         rw add_comm } },
-    apply ge_of_tendsto lim _, },
+    apply ge_of_tendsto lim _,
+    simp only [filter.eventually_at_top, ge_iff_le],
+    use 1,
+    intros b hb, 
+    have : b ≠ 0 := nat.one_le_iff_ne_zero.mp hb,
+    exact root_ineq x y this hmul H },
   { intros hf n,
     exact nat_norm_le_one n hmul hf }
 end
