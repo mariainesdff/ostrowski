@@ -549,68 +549,90 @@ begin
   apply_instance,
 end
 
+lemma pow_mul_pow_le_max_pow {a b : ℝ} {m n : ℕ} (ha : 0 ≤ a) (hb : 0 ≤ b) : a^m * b^n ≤ max a b ^ (m + n) :=
+begin
+  rw pow_add,
+  apply mul_le_mul,
+  { exact pow_le_pow_of_le_left ha (le_max_left a b) m },
+  { exact pow_le_pow_of_le_left hb (le_max_right a b) n },
+  { exact pow_nonneg hb n },
+  { apply pow_nonneg,
+    rw le_max_iff,
+    left,
+    exact ha }
+end 
+
+lemma inter_ineq {n : ℕ} (x y : ℚ) (hmul : mul_eq f) (hf : ∀ m : ℕ, f m ≤ 1) : f (x + y)^(n : ℝ) ≤ (n + 1 : ℝ) * max (f x) (f y)^n :=
+begin
+  norm_cast,
+  rw [←mul_eq_pow hmul, add_pow],
+  apply le_trans (Sum_le (n + 1) _),
+  suffices goal_1 : ∑ i in finset.range (n + 1), f ( x^i * y^(n - i) * (n.choose i) )
+    = ∑ i in finset.range (n + 1), f (x ^ i) * f(y ^ (n - i)) * f (n.choose i),
+  { rw goal_1,
+    clear goal_1,
+    calc ∑ i in finset.range (n + 1), f (x ^ i) * f(y ^ (n - i)) * f (n.choose i)
+        ≤ ∑ i in finset.range (n + 1), f (x ^ i) * f (y ^ (n - i)) : 
+          begin
+            apply finset.sum_le_sum,
+            intros i hi,
+            conv { to_rhs, rw ←mul_one (f (x ^ i) * f (y ^ (n - i))) },
+            exact mul_le_mul_of_nonneg_left (hf _) (mul_nonneg (map_nonneg f _) (map_nonneg f _))
+          end
+    ... ≤ ∑ i in finset.range (n + 1), max (f x) (f y) ^ n : 
+          begin
+            apply finset.sum_le_sum,
+            intros i hi,
+            have : i + (n - i) = n,
+            { rw add_comm,
+              apply nat.sub_add_cancel,
+              simp at hi,
+              linarith },
+            conv { to_rhs, rw ←this },
+            repeat { rw mul_eq_pow hmul },
+            exact pow_mul_pow_le_max_pow (map_nonneg f x) (map_nonneg f y),
+          end
+    ... = ↑(n + 1) * max (f x) (f y) ^ n : by simp, },
+    { congr',
+      ext,
+      rw [hmul, hmul] }
+end
+
+lemma root_ineq {n : ℕ} (x y : ℚ) (hn : n ≠ 0) (hmul : mul_eq f) (hf : ∀ m : ℕ, f m ≤ 1) : f (x + y) ≤ (n + 1 : ℝ) ^ (1 / (n : ℝ)) * max (f x) (f y) :=
+begin
+  refine le_of_pow_le_pow n _ (nat.pos_of_ne_zero hn) _,
+  { apply mul_nonneg,
+    { apply real.rpow_nonneg_of_nonneg,
+      norm_cast,
+      linarith },
+    { rw le_max_iff,
+      left,
+      exact map_nonneg f x } },
+  { rw mul_pow,
+    have : 0 ≤ (n : ℝ) + 1 := by { norm_cast, linarith },
+    nth_rewrite 1 [←real.rpow_nat_cast],
+    rw [←real.rpow_mul this, one_div],
+    have : (n : ℝ) ≠ 0 := by { norm_cast, exact hn },
+    rw [inv_mul_cancel this, real.rpow_one, ←real.rpow_nat_cast],
+    exact inter_ineq x y hmul hf }
+end
+
 -- A norm is non-archimedean iff it's bounded on the naturals
 lemma non_archimidean_iff_nat_norm_bound (hmul : mul_eq f) : (∀ n : ℕ, f n ≤ 1) ↔ is_nonarchimedean f :=
 begin
   split,
   { intros H x y,
-    have max_ineq : ∀ m n : ℕ, (f x)^m * (f y)^n ≤ (max (f x) (f y))^(m+n),
-    { intros m n,
-      rw pow_add,
-      apply mul_le_mul,
-      { apply pow_le_pow_of_le_left (map_nonneg f _) (le_max_left (f x) (f y)) },
-      { apply pow_le_pow_of_le_left (map_nonneg f _) (le_max_right (f x) (f y)) },
-      { apply pow_nonneg,
-        exact (map_nonneg f _) },
-      { apply pow_nonneg,
-        rw le_max_iff,
-        left,
-        exact (map_nonneg f _) } },
-    have inter_ineq : ∀ n : ℕ, (f (x + y))^(n : ℝ) ≤ (n+1 : ℝ) * (max (f x) (f y))^n,
-    { intro n,
-      norm_cast,
-       rw ←(mul_eq_pow hmul),
-       rw add_pow,
-       apply le_trans (Sum_le (n + 1) _),
-       suffices goal_1 : ∑ (i : ℕ) in finset.range (n + 1), f (x ^ i * y ^ (n - i) * (n.choose i))
-         = ∑ (i : ℕ) in finset.range (n + 1), f (x ^ i) *  f (y ^ (n - i)) * f (n.choose i),
+    have lim : filter.tendsto (λ n : ℕ, (n + 1 : ℝ) ^ (1 / (n : ℝ)) * max (f x) (f y)) filter.at_top (nhds (max (f x) (f y))),
+    { nth_rewrite 0 ←one_mul (max (f x) (f y)),
+      apply filter.tendsto.mul_const (max (f x) (f y)),
+      suffices goal_1 : (λ k : ℕ, ((k : ℝ) + 1) ^ (1 / (k : ℝ))) = (λ k : ℕ, (1 + (k : ℝ) * 1) ^ (1 / (k : ℝ))),
       { rw goal_1,
         clear goal_1,
-        calc ∑ (i : ℕ) in finset.range (n + 1), f (x ^ i) * f (y ^ (n - i)) * f (n.choose i)
-            ≤ ∑ (i : ℕ) in finset.range (n + 1), f (x ^ i) * f (y ^ (n - i)) :
-              begin
-                apply finset.sum_le_sum,
-                intros i hi,
-                conv {
-                  to_rhs,
-                  rw ←mul_one (f (x ^ i) * f (y ^ (n - i))),
-                },
-                apply mul_le_mul_of_nonneg_left,
-                { exact H _ },
-                { exact mul_nonneg (map_nonneg f _) (map_nonneg f _) }
-              end
-        ... ≤ ∑ (i : ℕ) in finset.range (n + 1), (max (f x) (f y))^n : 
-              begin
-                apply finset.sum_le_sum,
-                intros i hi,
-                have aux : i + (n - i) = n,
-                { rw add_comm,
-                  apply nat.sub_add_cancel,
-                  simp at hi,
-                  linarith },
-                conv { to_rhs, rw ←aux, },
-                repeat { rw mul_eq_pow hmul },
-                exact max_ineq i (n-i)
-              end
-        ... = ↑(n + 1) * max (f x) (f y) ^ n : by simp, },
-      congr',
-      ext,
-      rw hmul,
-      rw hmul, }, 
-    have root_ineq : ∀ n : ℕ, f (x + y) ≤ (n + 1 : ℝ)^(1/(n : ℝ)) * (max (f x) (f y)),
-    { intro n,
-      library_search, },
-    sorry },
+        exact limit2 (real.zero_lt_one) },
+      { ext k,
+        simp,
+        rw add_comm } },
+    apply ge_of_tendsto lim _, },
   { intros hf n,
     exact nat_norm_le_one n hmul hf }
 end
