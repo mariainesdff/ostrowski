@@ -6,6 +6,7 @@ Authors: María Inés de Frutos-Fernández
 import number_theory.padics.padic_norm
 import basic
 import order.filter.basic
+import data.nat.digits
 
 open_locale big_operators
 
@@ -640,6 +641,30 @@ begin
     exact root_ineq x y this hmul H },
   { intros hf n,
     exact nat_norm_le_one n hmul hf }
+end
+
+-- use the wikipedia proof for the archimedean case 
+-- it's the same, but with a simpler exposition
+lemma key_ineq (hmul : mul_eq f) {a b n : ℕ} (ha : 1 < a) (hb : 1 < b) (hfb : 1 < f b) : (f b : ℝ) ≤ (f a : ℝ) ^ (real.log (b : ℝ) / real.log (a : ℝ)) ∧ f a > 1 :=
+begin
+  let m := (a.digits (b^n)).length,
+  have m_ineq : (m : ℝ) ≤ (n : ℝ) * (real.log (b : ℝ) / real.log (a : ℝ)) + 1 := by sorry, -- library?
+  have : (f b) ^ n ≤ a * m * max ((f a) ^ (m - 1)) 1,
+  { calc (f b) ^ n = f (b ^ n) : by sorry
+      -- next line should be
+      -- { nth_rewrite 0 [←nat.of_digits_digits a (b ^ n)], rw nat.of_digits_eq_sum_map_with_index }
+      -- but the coercion in the argument of f needs to happen after the exponentiation for the rewrite to work
+               ... = f (((a.digits (b ^ n)).map_with_index (λ i cᵢ, cᵢ * a ^ i)).sum) : by sorry
+
+               ... ≤ ((a.digits (b ^ n)).map_with_index (λ i cᵢ, f (↑cᵢ * a ^ i))).sum : by sorry -- consequence of add_le and hmul
+      ... ≤ a * m * max ((f a) ^ (m - 1)) 1 : by sorry -- f (cᵢ * a^i) ≤ max((f a)^(m-1), 1)
+  },
+  -- use m_ineq to replace m by n * log_a b + 1
+  -- take nth roots and let n → ∞ (use limit2)
+  -- conclude f b ≤ max ((f a) ^ log_a b, 1)
+  -- so must also have a > 1, else b ≤ 1, contradicting hb
+  -- so this inequality is symmetric...
+  sorry
 end
 
 end archimedean
