@@ -6,6 +6,8 @@ Authors: María Inés de Frutos-Fernández
 import number_theory.padics.padic_norm
 import basic
 import order.filter.basic
+import analysis.special_functions.log.base
+import data.nat.digits
 
 open_locale big_operators
 
@@ -618,7 +620,7 @@ begin
 end
 
 -- A norm is non-archimedean iff it's bounded on the naturals
-lemma non_archimidean_iff_nat_norm_bound (hmul : mul_eq f) : (∀ n : ℕ, f n ≤ 1) ↔ is_nonarchimedean f :=
+lemma non_archimedean_iff_nat_norm_bound (hmul : mul_eq f) : (∀ n : ℕ, f n ≤ 1) ↔ is_nonarchimedean f :=
 begin
   split,
   { intros H x y,
@@ -642,6 +644,114 @@ begin
     exact nat_norm_le_one n hmul hf }
 end
 
+lemma aux1 {n₀ : ℕ} (hf_mul : mul_eq f) (hf : ∃ n : ℕ, 1 < f n) (dn₀ : n₀ = nat.find hf) : 1 < n₀ :=
+begin
+  have hn₀ := nat.find_spec hf,
+  rw ←dn₀ at hn₀,
+  by_contra',
+  rw lt_iff_not_ge at hn₀,
+  interval_cases n₀,
+  { apply hn₀,
+    simp only [nat.cast_zero, map_zero, ge_iff_le, zero_le_one] },
+  { apply hn₀,
+    simp [norm_one_eq_one hf_mul] }
+end
+
+lemma list.map_with_index_append {α M : Type*} [add_comm_monoid M] 
+  (K L : list α) (f : ℕ → α → M) : 
+  (K ++ L).map_with_index f = K.map_with_index f ++ L.map_with_index (λ i a, f (i + K.length) a) :=
+begin
+  induction K with a J IH generalizing f,
+  { simp },
+  { simp [IH (λ i, f (i+1)), add_assoc], }
+end
+
+lemma list.map_with_index_sum_to_finset_sum {β A : Type*} [add_comm_monoid A] {f : ℕ → β → A} {L : list β}  [inhabited β] :
+  (L.map_with_index f).sum = ∑ i in finset.range L.length, f i ((L.nth i).get_or_else default) :=
+begin
+  apply list.reverse_rec_on L, -- the induction principle which works best
+  { simp, },
+  { intros M a IH,
+    simp [list.map_with_index_append, IH],
+    rw finset.sum_range_succ,
+    congr' 1,
+    { apply finset.sum_congr rfl,
+      intros x hx,
+      congr' 2,
+      rw finset.mem_range at hx,
+      rw list.nth_append hx, },
+    { simp, } },
+end
+
+lemma aux2 {n₀ : ℕ} {α : ℝ} (hf_mul : mul_eq f) (hf : ∃ n : ℕ, 1 < f n) 
+  (dn₀ : n₀ = nat.find hf) (dα : α = real.log (f n₀) / real.log n₀) : ∀ n : ℕ, f n ≤ n ^ α :=
+begin
+  intro n,
+  have : f n₀ = n₀ ^ α,
+  { rw dα,
+    rw real.log_div_log,
+    apply eq.symm,
+    apply real.rpow_logb,
+    { norm_cast,
+      exact lt_trans zero_lt_one (aux1 hf_mul hf dn₀) },
+    { apply ne_of_gt,
+      norm_cast,
+      exact aux1 hf_mul hf dn₀ },
+    { have hn₀ := nat.find_spec hf,
+      rw ←dn₀ at hn₀,
+      exact lt_trans zero_lt_one hn₀ } },
+  conv_lhs { rw ←nat.of_digits_digits n₀ n },
+  rw nat.of_digits_eq_sum_map_with_index,
+  rw list.map_with_index_sum_to_finset_sum,
+  simp,
+  apply le_trans (Sum_le (n₀.digits n).length _),
+  suffices goal_1 : ∑ i in finset.range (n₀.digits n).length, f (((((n₀.digits n).nth i).get_or_else default) : ℚ) * (n₀ : ℚ) ^ i)
+    = ∑ i in finset.range (n₀.digits n).length, f (((n₀.digits n).nth i).get_or_else default) * (f n₀) ^ i,
+  { rw goal_1,
+    clear goal_1,
+    have coef_ineq : ∀ i : ℕ, f (((n₀.digits n).nth i).get_or_else default) ≤ 1,
+    { intro i,
+      have : ((n₀.digits n).nth i).get_or_else default < n₀,
+      { by_cases h : i < (n₀.digits n).length,
+        { sorry },
+        { sorry } },
+      apply le_of_not_gt,
+      rw dn₀ at this ⊢,
+      rw gt_iff_lt,
+      exact nat.find_min hf this },
+    sorry },
+  { congr',
+    ext,
+    rw [hf_mul, mul_eq_pow hf_mul] }
+end
+
+lemma archimedean_case (hf_mul : mul_eq f) (hf : ¬ is_nonarchimedean f) : ring_norm.equiv f ring_norm.real :=
+begin
+  /-rw ←non_archimedean_iff_nat_norm_bound hf_mul at hf,
+  push_neg at hf,
+  set n₀ := nat.find hf with dn₀,
+  have hn₀ := nat.find_spec hf,
+  rw ←dn₀ at hn₀,
+  have n0gt1 : 1 < n₀,
+  { by_contra',
+    rw lt_iff_not_ge at hn₀,
+    interval_cases n₀,
+    { apply hn₀,
+      simp [h] },
+    { apply hn₀,
+      simp [h, norm_one_eq_one hf_mul] } },
+  use (real.log (f n₀)) / (real.log n₀),
+  split,
+  { rw div_eq_inv_mul,
+    apply right.mul_pos,
+    { rw inv_pos,
+      exact real.log_pos (by { norm_cast, exact n0gt1 }) },
+    { exact real.log_pos hn₀ } },
+  have lemma1 : ∀ n : ℕ, f n ≤ n ^ ((real.log (f n₀)) / (real.log n₀)),
+  {  } -/
+  sorry
+end
+
 end archimedean
 
 /-- Ostrowski's Theorem -/
@@ -651,7 +761,7 @@ theorem rat_ring_norm_p_adic_or_real (f : ring_norm ℚ) (hf_nontriv : f ≠ 1) 
 begin
     by_cases bdd : ∀ z : ℤ, f z ≤ 1,
     { right, /- p-adic case -/
-      rw [←int_norm_bound_iff_nat_norm_bound hf_mul, non_archimidean_iff_nat_norm_bound hf_mul] at bdd,
+      rw [←int_norm_bound_iff_nat_norm_bound hf_mul, non_archimedean_iff_nat_norm_bound hf_mul] at bdd,
       exact f_equiv_padic bdd hf_mul hf_nontriv },
     { sorry /- Euclidean case -/ }
 end
