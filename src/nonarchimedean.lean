@@ -84,7 +84,7 @@ begin
     simp [h], 
     rw H₁,
     rw [hfnateq1 x.denom (by linarith [x.pos])],
-    norm_num
+    norm_num,
   }
 end
 
