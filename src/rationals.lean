@@ -656,8 +656,10 @@ begin
     { simp, } },
 end
 
+-- This is lemma 1.1
 lemma aux2 {n₀ : ℕ} {α : ℝ} (hf : ∃ n : ℕ, 1 < f n) 
-  (dn₀ : n₀ = nat.find hf) (dα : α = real.log (f n₀) / real.log n₀) : ∀ n : ℕ, f n ≤ n ^ α :=
+  (dn₀ : n₀ = nat.find hf) (dα : α = real.log (f n₀) / real.log n₀) : 
+    ∀ n : ℕ, f n ≤ n ^ α :=
 begin
   intro n,
   have : f n₀ = n₀ ^ α,
@@ -697,6 +699,12 @@ begin
     ext,
     rw [f_mul_eq, mul_eq_pow] }
 end
+
+-- This is lemma 1.2 (this looks hard btw)
+lemma aux3 {n₀ : ℕ} {α : ℝ} (hf : ∃ n : ℕ, 1 < f n) 
+  (dn₀ : n₀ = nat.find hf) (dα : α = real.log (f n₀) / real.log n₀) : 
+    ∀ n : ℕ, (n ^ α : ℝ) ≤ f n := sorry
+
 
 lemma archimedean_case (hf : ¬ is_nonarchimedean f) : mul_ring_norm.equiv f mul_ring_norm.real :=
 begin
