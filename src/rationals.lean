@@ -132,7 +132,8 @@ begin
     exact le_trans harc (max_le hc rfl.ge), },
 end
 
-lemma int_norm_bound_iff_nat_norm_bound (heq : mul_eq f) : (∀ n : ℕ, f n ≤ 1) ↔ (∀ z : ℤ, f z ≤ 1) :=
+lemma int_norm_bound_iff_nat_norm_bound (heq : mul_eq f) : 
+  (∀ n : ℕ, f n ≤ 1) ↔ (∀ z : ℤ, f z ≤ 1) :=
 begin
   split,
   { intros h z,
@@ -332,15 +333,10 @@ lemma a_contains_prime_ideal (harc : is_nonarchimedean f) (heq : mul_eq f) (h_no
   ∃ (p : ℕ) [hp : fact (nat.prime p)], 𝔞 harc heq ≥ ideal.span {p} :=
 begin
   obtain ⟨p, hp, hbound⟩ := ex_prime_norm_lt_one heq harc h_nontriv,
-  use p,
-  split, { exact hp },
+  refine ⟨p, hp, _⟩,
   { apply ideal.span_le.mpr,
-    intros ppr hp,
-    unfold 𝔞,
-    simp only [set.mem_singleton_iff] at hp,
-    simp only [submodule.coe_set_mk, set.mem_set_of_eq],
-    rw hp,
-    exact hbound }
+    simp only [set.singleton_subset_iff, set_like.mem_coe],
+    exact hbound, }
 end
 
 -- Show that it's in fact equal to pZ (since pZ is a maximal ideal)
@@ -348,8 +344,7 @@ lemma a_eq_prime_ideal (harc : is_nonarchimedean f) (heq : mul_eq f) (h_nontriv 
   ∃ (p : ℕ) [hp : fact (nat.prime p)], 𝔞 harc heq = ideal.span {p} :=
 begin
   obtain ⟨p, hp, hinc⟩ := a_contains_prime_ideal harc heq h_nontriv,
-  use p,
-  split, { exact hp },
+  refine ⟨p, hp, _⟩,
   cases hp,
   have h_irr : irreducible (p : ℤ) := (nat.prime_iff_prime_int.mp hp).irreducible,
   have hmax : ideal.is_maximal (ideal.span ({p} : set ℤ)) :=
@@ -440,7 +435,8 @@ begin
     norm_cast,
   },
   rw this,
-  simp [ring_norm_eq_padic_norm, ha],
+  simp only [ring_norm_eq_padic_norm, ha, padic_norm.eq_zpow_of_nonzero, ne.def, int.cast_eq_zero, not_false_iff,
+  padic_val_rat.of_int, zpow_neg, zpow_coe_nat, rat.cast_inv, rat.cast_pow, rat.cast_coe_nat],
   unfold padic_val_int padic_val_nat,
   simp [ha, hp.ne_one, int.nat_abs_pos_of_ne_zero ha, multiplicity.int.nat_abs p a],
   have hppos : (p : ℝ) > 0 := nat.cast_pos.mpr (hp.pos),
