@@ -77,38 +77,18 @@ section non_archimedean
 -- Maybe this should be inserted into the final proof.
 def 𝔞 (harc : is_nonarchimedean f) : ideal ℤ :=
 { carrier := {a : ℤ | f a < 1},
-  add_mem' := begin
-     intros a b ha hb,
-     simp only [set.mem_set_of_eq, int.cast_add],
-     have : max (f a) (f b) < 1 := max_lt ha hb,
-     linarith [harc a b]
-  end,
-  zero_mem' := begin
-    change f 0 < 1,
-    rw [map_zero f],
-    exact zero_lt_one,
-  end,
-  smul_mem' := begin
-    intros a b hb,
-    change f (↑(a * b)) < 1,
-    simp only [int.cast_mul],
-    rw f_mul_eq,
-    exact mul_lt_of_le_of_lt_one' (int_norm_le_one a harc) hb (map_nonneg f b) zero_lt_one,
-  end }
+  add_mem' := λ a b ha hb, by simp only [set.mem_set_of_eq, int.cast_add] at ha hb ⊢;
+    linarith [(harc a b), (max_lt ha hb)],
+  zero_mem' := by simp only [set.mem_set_of_eq, algebra_map.coe_zero, map_zero, zero_lt_one],
+  smul_mem' := λ a b hb, by simp only [algebra.id.smul_eq_mul, set.mem_set_of_eq, int.cast_mul,
+    map_mul, mul_lt_of_le_of_lt_one' (int_norm_le_one a harc) hb (map_nonneg f b) zero_lt_one]}
 
 --Maybe this should be inserted into the final proof.
 lemma a_proper (harc : is_nonarchimedean f) : 𝔞 harc ≠ (⊤ : ideal ℤ) :=
 begin
-  intro h,
-  have : (1 : ℤ) ∉ (𝔞 harc),
-  { 
-    unfold 𝔞,
-    simp only [submodule.mem_mk, set.mem_set_of_eq, int.cast_one, not_lt],
-    exact f.map_one'.ge,
-  },
-  rw h at this,
-  apply this,
-  exact trivial,
+  rw ideal.ne_top_iff_one,
+  dsimp only [𝔞, submodule.mem_mk, set.mem_set_of_eq, int.cast_one, not_lt],
+  simp only [algebra_map.coe_one, map_one, lt_self_iff_false, not_false_iff],
 end
 
 -- Show that it contains pZ
@@ -127,24 +107,15 @@ end
 -- Maybe this should be inserted into the final proof.
 lemma a_eq_prime_ideal (harc : is_nonarchimedean f) (h_nontriv : f ≠ 1) :
   ∃ (p : ℕ) [hp : fact (nat.prime p)], 𝔞 harc = ideal.span {p} :=
-begin
-  obtain ⟨p, hp, hinc⟩ := a_contains_prime_ideal harc h_nontriv,
-  refine ⟨p, hp, _⟩,
-  cases hp,
-  have h_irr : irreducible (p : ℤ) := (nat.prime_iff_prime_int.mp hp).irreducible,
-  have hmax : ideal.is_maximal (ideal.span ({p} : set ℤ)) :=
-    principal_ideal_ring.is_maximal_of_irreducible h_irr,
-  symmetry,
-  exact hmax.eq_of_le (a_proper harc) hinc,
-end
+by obtain ⟨p, hp, hinc⟩ := a_contains_prime_ideal harc h_nontriv;
+  refine ⟨p, hp, ((principal_ideal_ring.is_maximal_of_irreducible
+    (nat.prime_iff_prime_int.mp hp.1).irreducible).eq_of_le (a_proper harc) hinc).symm⟩
 
 -- I will try to see whether there is a similar version of this (hopefully)
 lemma mult_finite {a : ℤ} {p : ℕ} (hp : nat.prime p) (ha : a ≠ 0) :
   multiplicity.finite (p : ℤ) a :=
-begin
-  apply multiplicity.finite_int_iff.mpr,
-  simp only [ha, hp.ne_one, int.nat_abs_of_nat, ne.def, not_false_iff, and_self],
-end
+by apply multiplicity.finite_int_iff.mpr;
+  simp only [ha, hp.ne_one, int.nat_abs_of_nat, ne.def, not_false_iff, and_self]
 
 -- the equality at the end of the next lemma
 lemma rearrange {p v : ℝ} (m : ℕ) (hp : p > 0) (hlogp : real.log p ≠ 0) (hv : v > 0) : 
