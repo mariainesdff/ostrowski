@@ -35,7 +35,7 @@ end
 lemma int_norm_le_one (z : ℤ) (harc : is_nonarchimedean f) : f z ≤ 1 :=
 int_norm_bound_iff_nat_norm_bound.mp (λ n, nat_norm_le_one n harc) z
 
--- Nontrivial on ℚ implies nontrivial on ℕ.
+-- If the norm is nonarchimedean, then nontrivial on ℚ implies nontrivial on ℕ.
 lemma nat_nontriv_of_rat_nontriv (harc : is_nonarchimedean f) (hf : f ≠ 1): 
   ∃ n : ℕ, n ≠ 0 ∧ f n < 1 := 
 begin
