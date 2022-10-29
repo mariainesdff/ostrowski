@@ -121,15 +121,14 @@ by apply multiplicity.finite_int_iff.mpr;
 lemma rearrange {p v : ℝ} (m : ℕ) (hp : p > 0) (hlogp : real.log p ≠ 0) (hv : v > 0) : 
   v ^ m = (p ^ m)⁻¹ ^ (-real.log v / real.log p) :=
 begin
-  rw ←real.rpow_neg_one,
   have : p ^ m = p ^ (m : ℝ) := by norm_cast,
-  rw [this, ←(real.rpow_mul (le_of_lt hp)), ←(real.rpow_mul (le_of_lt hp)), neg_div],
-  simp only [mul_neg, mul_one, neg_mul, neg_neg],
-  rw [mul_div, ←real.log_rpow hv, real.rpow_def_of_pos hp, mul_div_left_comm,
-    div_self hlogp, mul_one, real.exp_log],
+  rw [←real.rpow_neg_one, this, ←(real.rpow_mul (le_of_lt hp)), 
+    ←(real.rpow_mul (le_of_lt hp)), neg_div, mul_neg, mul_neg, mul_one, neg_mul, neg_neg,
+      mul_div, ←real.log_rpow hv, real.rpow_def_of_pos hp, mul_div_left_comm,
+        div_self hlogp, mul_one, real.exp_log],
   { norm_cast },
-  norm_cast,
-  exact pow_pos hv m,
+  { norm_cast,
+    exact pow_pos hv m }
 end
 
 -- f a = (f p)^m = ring_norm a
@@ -138,23 +137,17 @@ lemma int_val_eq (harc : is_nonarchimedean f) (h_nontriv : f ≠ 1) :
     ∀ (a : ℤ), f a = (@mul_ring_norm.padic p hp a)^s :=
 begin
   obtain ⟨p, hp, h_aeq⟩ := a_eq_prime_ideal harc h_nontriv,
-  use [p, hp],
+  refine ⟨p, hp, _⟩,
   cases hp,
   have fpgt0 := @norm_pos_of_ne_zero f _ (nat.cast_ne_zero.mpr (ne_of_gt hp.pos)),
-  have hpgt1 : (p : ℝ) > 1,
-  { exact_mod_cast hp.one_lt },
-  have hlogp : real.log p > 0 := real.log_pos hpgt1,
   let s := (-real.log (f p : ℝ) / real.log p),
   have hs : s > 0,
-  { have fp_lt_one : (f p) < 1, -- prove this through p ∈ 𝔞 through h_aeq
-    { have p_mem_a : (p : ℤ) ∈ ideal.span ({p} : set ℤ) := by rw ideal.mem_span_singleton,
+  { refine div_pos _ (@real.log_pos p (by exact_mod_cast hp.one_lt)),
+    { refine neg_pos.mpr ((real.log_neg_iff fpgt0).mpr _),
+      have p_mem_a : (p : ℤ) ∈ ideal.span ({p} : set ℤ) := by rw ideal.mem_span_singleton,
       rw ←h_aeq at p_mem_a,
-      unfold 𝔞 at p_mem_a,
-      simp only [submodule.mem_mk, set.mem_set_of_eq, int.cast_coe_nat] at p_mem_a,
-      exact p_mem_a },
-    have hlogfp : real.log (f p) < 0 := (real.log_neg_iff fpgt0).mpr fp_lt_one,
-    exact div_pos (neg_pos.mpr hlogfp) hlogp },
-  use [s, hs],
+      exact p_mem_a, } },
+  refine ⟨s, hs, _⟩,
   intro a,
   by_cases ha : a = 0,
   { rw ha,
@@ -192,7 +185,7 @@ begin
   unfold padic_val_int padic_val_nat,
   simp [ha, hp.ne_one, int.nat_abs_pos_of_ne_zero ha, multiplicity.int.nat_abs p a],
   have hppos : (p : ℝ) > 0 := nat.cast_pos.mpr (hp.pos),
-  exact rearrange m hppos (norm_num.ne_zero_of_pos _ hlogp) fpgt0,
+  exact rearrange m hppos (norm_num.ne_zero_of_pos _ (@real.log_pos p (by exact_mod_cast hp.one_lt))) fpgt0,
 end
 
 lemma cast_pow_sub (r : ℝ) (a b : ℤ) : r ^ (a - b) = r ^ ((a : ℝ) - (b : ℝ)) := by norm_cast
