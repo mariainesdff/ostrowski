@@ -450,10 +450,10 @@ begin
       rw ←dn₀ at hn₀,
       exact lt_trans zero_lt_one hn₀ } },
   have hα : 0 ≤ α,
-  {sorry},
+  {sorry}, --easy
   let C : ℝ := ((n₀ : ℝ) ^ α) / ((n₀ : ℝ) ^ α - 1),
   have hC : 0 ≤ C,
-  {sorry},
+  {sorry}, -- easy to do
   suffices : ∀ n : ℕ, f n ≤ C * ((n : ℝ) ^ α),
   {sorry}, -- Some limit staff here.
   intro n,
@@ -498,16 +498,16 @@ begin
       ((n₀ : ℝ) ^ α) ^ (i : ℕ) ≤ ∑'i : ℕ, (1 / ((n₀ : ℝ) ^ α)) ^ i,
     {sorry},
     have aux' : 0 ≤ (n₀ : ℝ) ^ (α * ((n₀.digits n).length)),
-    {sorry},
+    {sorry}, -- easy
     have goal3 : ((n₀ : ℝ) ^ (α * ((n₀.digits n).length))) 
       * (∑ (i : (finset.Iio (n₀.digits n).length)), ((n₀ : ℝ) ^ α) ^ (i : ℕ)) 
         ≤ ((n₀ : ℝ) ^ (α * ((n₀.digits n).length))) * 
           (∑'i : ℕ, (1 / ((n₀ : ℝ) ^ α)) ^ i),
-    {sorry},
+    {sorry}, -- easy here
     apply le_trans goal3,
     clear goal3_aux aux' goal3,
     have goal4 : ∑'i : ℕ, (1 / ((n₀ : ℝ) ^ α)) ^ i = C,
-    {sorry},
+    {sorry}, -- `tsum_geometric_of_abs_lt_1` is useful here.
     rw goal4,
     clear goal4,
     rw mul_comm,
@@ -515,10 +515,10 @@ begin
     { nlinarith },
     have goal : (n₀ : ℝ) ^ ((n₀.digits n).length : ℝ) ≤ (n : ℝ),
     {sorry},
-    have stupid : (0 : ℝ) ≤ n₀ := sorry,
+    have stupid : (0 : ℝ) ≤ n₀ := sorry, -- easy
     rw mul_comm,
     rw real.rpow_mul stupid,
-    have stupid2 : 0 ≤ (n₀ : ℝ) ^ ((n₀.digits n).length : ℝ) := sorry,
+    have stupid2 : 0 ≤ (n₀ : ℝ) ^ ((n₀.digits n).length : ℝ) := sorry, --easy
     exact real.rpow_le_rpow stupid2 goal hα },
   { congr',
     ext,
