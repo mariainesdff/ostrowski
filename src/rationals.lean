@@ -247,6 +247,9 @@ begin
     ... ≤ (∑ i in finset.range n, f (ι i)) + f (ι n) : add_le_add_right hn _ }
 end
 
+lemma Sum_le' (n : ℕ) (ι : finset.Iio n → ℚ) :
+  f (∑ i : finset.Iio n, ι i) ≤ ∑ i : finset.Iio n, f (ι i) := sorry
+
 --First limit
 lemma limit1 {N : ℝ} (hN : 0 < N) : filter.tendsto (λ n : ℕ, N ^ (1 / (n : ℝ))) filter.at_top (nhds 1) :=
 begin
@@ -400,8 +403,17 @@ begin
   { simp [IH (λ i, f (i+1)), add_assoc], }
 end
 
-lemma list.map_with_index_sum_to_finset_sum {β A : Type*} [add_comm_monoid A] {f : ℕ → β → A} {L : list β}  [inhabited β] :
-  (L.map_with_index f).sum = ∑ i in finset.range L.length, f i ((L.nth i).get_or_else default) :=
+lemma list.map_with_index_sum_to_finset_sum' {β A : Type*} [add_comm_monoid A] {f : ℕ → β → A} 
+  {L : list β}  [inhabited β] : (L.map_with_index f).sum = ∑ i : finset.Iio L.length, 
+    f i ((L.nth_le i (finset.mem_Iio.1 i.2))) :=
+begin
+  
+  sorry
+end
+
+lemma list.map_with_index_sum_to_finset_sum {β A : Type*} [add_comm_monoid A] {f : ℕ → β → A} 
+  {L : list β}  [inhabited β] : (L.map_with_index f).sum = ∑ i in finset.range L.length, 
+    f i ((L.nth i).get_or_else default) :=
 begin
   apply list.reverse_rec_on L, -- the induction principle which works best
   { simp, },
@@ -437,21 +449,26 @@ begin
       exact lt_trans zero_lt_one hn₀ } },
   conv_lhs { rw ←nat.of_digits_digits n₀ n },
   rw nat.of_digits_eq_sum_map_with_index,
-  rw list.map_with_index_sum_to_finset_sum,
-  simp,
-  apply le_trans (Sum_le (n₀.digits n).length _),
-  suffices goal_1 : ∑ i in finset.range (n₀.digits n).length, f (((((n₀.digits n).nth i).get_or_else default) : ℚ) * (n₀ : ℚ) ^ i)
-    = ∑ i in finset.range (n₀.digits n).length, f (((n₀.digits n).nth i).get_or_else default) * (f n₀) ^ i,
+  rw list.map_with_index_sum_to_finset_sum',
+  simp only [nat.cast_sum, nat.cast_mul, nat.cast_pow],
+  apply le_trans (Sum_le' (n₀.digits n).length _),
+  suffices goal_1 : ∑ i : finset.Iio (n₀.digits n).length,
+    f (((((n₀.digits n).nth_le i (finset.mem_Iio.1 i.2))) : ℚ)
+      * (n₀ : ℚ) ^ (i : ℕ)) = ∑ i : finset.Iio (n₀.digits n).length,
+        f (((n₀.digits n).nth_le i (finset.mem_Iio.1 i.2))) 
+          * (f n₀) ^ (i : ℕ),
   { rw goal_1,
     clear goal_1,
-    have coef_ineq : ∀ i : ℕ, f (((n₀.digits n).nth i).get_or_else default) ≤ 1,
+    have coef_ineq : ∀ i : finset.Iio (n₀.digits n).length,
+      f (((n₀.digits n).nth_le i (finset.mem_Iio.1 i.2))) ≤ 1,
     { intro i,
-      have : ((n₀.digits n).nth i).get_or_else default < n₀,
-      { by_cases h : i < (n₀.digits n).length,
-        { sorry },
-        { sorry } },
+      have : ((n₀.digits n).nth_le i (finset.mem_Iio.1 i.2)) < n₀,
+      { have aux' : 2 ≤ n₀ := by linarith [aux1 hf dn₀],
+        have aux'' : ((n₀.digits n).nth_le i (finset.mem_Iio.1 i.2)) ∈ n₀.digits n,
+        { exact (nat.digits n₀ n).nth_le_mem ↑i (finset.mem_Iio.mp i.property) },
+        exact nat.digits_lt_base aux' aux'', },
       apply le_of_not_gt,
-      rw dn₀ at this ⊢,
+      subst dn₀,
       rw gt_iff_lt,
       exact nat.find_min hf this },
     sorry },
@@ -459,6 +476,19 @@ begin
     ext,
     rw [f_mul_eq, mul_eq_pow] }
 end
+
+/--
+      have : ((n₀.digits n).nth i).get_or_else default < n₀,
+      { by_cases h : i < (n₀.digits n).length,
+        { sorry },
+        { simp at h,
+          
+          sorry } },
+      apply le_of_not_gt,
+      rw dn₀ at this ⊢,
+      rw gt_iff_lt,
+      exact nat.find_min hf this
+-/
 
 -- This is lemma 1.2 (this looks hard btw)
 lemma aux3 {n₀ : ℕ} {α : ℝ} (hf : ∃ n : ℕ, 1 < f n) 
