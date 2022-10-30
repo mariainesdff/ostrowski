@@ -471,6 +471,14 @@ begin
       subst dn₀,
       rw gt_iff_lt,
       exact nat.find_min hf this },
+    rw this,
+    have goal1 : ∑ (i : (finset.Iio (n₀.digits n).length)),
+      f ((n₀.digits n).nth_le ↑i (finset.mem_Iio.1 i.2)) * (n₀ ^ α) ^ (i : ℕ) ≤
+        ∑ (i : (finset.Iio (n₀.digits n).length)), (n₀ ^ α) ^ (i : ℕ),
+    {sorry},
+    apply le_trans goal1,
+    clear goal1,
+    
     sorry },
   { congr',
     ext,
