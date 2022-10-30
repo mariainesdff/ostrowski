@@ -482,6 +482,7 @@ begin
   rw list.map_with_index_sum_to_finset_sum',
   simp only [nat.cast_sum, nat.cast_mul, nat.cast_pow],
   apply le_trans (Sum_le' (n₀.digits n).length _),
+  have aux' : 2 ≤ n₀ := by linarith [aux1 hf dn₀],
   suffices goal_1 : ∑ i : finset.Iio (n₀.digits n).length,
     f (((((n₀.digits n).nth_le i (finset.mem_Iio.1 i.2))) : ℚ)
       * (n₀ : ℚ) ^ (i : ℕ)) = ∑ i : finset.Iio (n₀.digits n).length,
@@ -493,8 +494,7 @@ begin
       f (((n₀.digits n).nth_le i (finset.mem_Iio.1 i.2))) ≤ 1,
     { intro i,
       have : ((n₀.digits n).nth_le i (finset.mem_Iio.1 i.2)) < n₀,
-      { have aux' : 2 ≤ n₀ := by linarith [aux1 hf dn₀],
-        have aux'' : ((n₀.digits n).nth_le i (finset.mem_Iio.1 i.2)) ∈ n₀.digits n,
+      { have aux'' : ((n₀.digits n).nth_le i (finset.mem_Iio.1 i.2)) ∈ n₀.digits n,
         { exact (nat.digits n₀ n).nth_le_mem ↑i (finset.mem_Iio.mp i.property) },
         exact nat.digits_lt_base aux' aux'', },
       apply le_of_not_gt,
@@ -509,36 +509,37 @@ begin
     apply le_trans goal1,
     clear goal1,
     have goal2 : (∑ i : (finset.Iio (n₀.digits n).length), ((n₀ : ℝ) ^ α) ^ (i : ℕ)) =
-    (((n₀ : ℝ) ^ (α * (n₀.digits n).length)) * 
-      ∑ i : (finset.Iio (n₀.digits n).length), ((n₀ : ℝ) ^ α) ^ (i : ℕ)),
+    (((n₀ : ℝ) ^ (α * ((n₀.digits n).length - 1))) * 
+      ∑ i : (finset.Iio (n₀.digits n).length), ((n₀ : ℝ) ^ -α) ^ (i : ℕ)),
     {sorry},
     rw goal2,
     clear goal2,
     have goal3_aux : ∑ (i : (finset.Iio (n₀.digits n).length)),
-      ((n₀ : ℝ) ^ α) ^ (i : ℕ) ≤ ∑'i : ℕ, (1 / ((n₀ : ℝ) ^ α)) ^ i,
+      ((n₀ : ℝ) ^ -α) ^ (i : ℕ) ≤ ∑'i : ℕ, (1 / ((n₀ : ℝ) ^ α)) ^ i,
     {sorry},
-    have aux' : 0 ≤ (n₀ : ℝ) ^ (α * ((n₀.digits n).length)),
+    have goal3_aux' : 0 ≤ (n₀ : ℝ) ^ (α * (((n₀.digits n).length - 1))),
     {sorry}, -- easy
-    have goal3 : ((n₀ : ℝ) ^ (α * ((n₀.digits n).length))) 
-      * (∑ (i : (finset.Iio (n₀.digits n).length)), ((n₀ : ℝ) ^ α) ^ (i : ℕ)) 
-        ≤ ((n₀ : ℝ) ^ (α * ((n₀.digits n).length))) * 
+    have goal3 : ((n₀ : ℝ) ^ (α * (((n₀.digits n).length - 1)))) 
+      * (∑ (i : (finset.Iio (n₀.digits n).length)), ((n₀ : ℝ) ^ -α) ^ (i : ℕ)) 
+        ≤ ((n₀ : ℝ) ^ (α * (((n₀.digits n).length - 1)))) * 
           (∑'i : ℕ, (1 / ((n₀ : ℝ) ^ α)) ^ i),
     {sorry}, -- easy here
     apply le_trans goal3,
-    clear goal3_aux aux' goal3,
+    clear goal3_aux goal3_aux' goal3,
     have goal4 : ∑'i : ℕ, (1 / ((n₀ : ℝ) ^ α)) ^ i = C,
     {sorry}, -- `tsum_geometric_of_abs_lt_1` is useful here.
     rw goal4,
     clear goal4,
     rw mul_comm,
-    suffices : (n₀ : ℝ) ^ (α * ((n₀.digits n).length)) ≤ (n : ℝ) ^ α,
+    suffices : (n₀ : ℝ) ^ (α * (((n₀.digits n).length - 1))) ≤ (n : ℝ) ^ α,
     { nlinarith },
-    have goal : (n₀ : ℝ) ^ ((n₀.digits n).length : ℝ) ≤ (n : ℝ),
-    {sorry},
+    have goal : (n₀ : ℝ) ^ (((n₀.digits n).length : ℝ) - 1) ≤ (n : ℝ),
+    { 
+      sorry},
     have stupid : (0 : ℝ) ≤ n₀ := sorry, -- easy
     rw mul_comm,
     rw real.rpow_mul stupid,
-    have stupid2 : 0 ≤ (n₀ : ℝ) ^ ((n₀.digits n).length : ℝ) := sorry, --easy
+    have stupid2 : 0 ≤ (n₀ : ℝ) ^ (((n₀.digits n).length : ℝ) - 1) := sorry, --easy
     exact real.rpow_le_rpow stupid2 goal hα },
   { congr',
     ext,
