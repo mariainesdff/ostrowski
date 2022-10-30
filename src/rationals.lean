@@ -13,6 +13,7 @@ import mul_ring_norm_rat
 import nonarchimedean
 import ring_theory.power_series.basic
 import analysis.specific_limits.normed
+import topology.algebra.order.basic
 
 open_locale big_operators
 
@@ -455,7 +456,26 @@ begin
   have hC : 0 ≤ C,
   {sorry}, -- easy to do
   suffices : ∀ n : ℕ, f n ≤ C * ((n : ℝ) ^ α),
-  {sorry}, -- Some limit staff here.
+  { intro n,
+    have limit' : filter.tendsto (λ N : ℕ, C ^ (1 / (N : ℝ))) filter.at_top (nhds 1),
+    {sorry}, --someone good at analysis
+    have limit'' : filter.tendsto 
+      (λ N : ℕ, (C ^ (1 / (N : ℝ))) * (n ^ α)) filter.at_top (nhds (n ^ α)),
+    {sorry}, --someone good at analysis
+    have stupid : (0 : ℝ) ≤ n := sorry, -- very easy
+    have aux : ∀ N : ℕ, (f (n)) ^ (N : ℝ) ≤ C * ((n ^ α) ^ (N : ℝ)),
+    { intro N,
+      rw ←real.rpow_mul stupid,
+      nth_rewrite 1 mul_comm,
+      rw real.rpow_mul stupid,
+      norm_cast,
+      rw ←mul_eq_pow,
+      specialize this (n ^ N),
+      norm_cast,
+      exact this, },
+    have aux1 : ∀ N : ℕ, f (n) ≤ (C ^ (1 / (N : ℝ))) * (n ^ α),
+    {sorry},  --take nth root on both side
+    exact ge_of_tendsto' limit'' aux1 },
   intro n,
   conv_lhs { rw ←nat.of_digits_digits n₀ n },
   rw nat.of_digits_eq_sum_map_with_index,
