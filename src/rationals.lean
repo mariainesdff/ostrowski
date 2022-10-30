@@ -11,6 +11,7 @@ import analysis.normed.ring.seminorm
 import data.nat.digits
 import mul_ring_norm_rat
 import nonarchimedean
+import ring_theory.power_series.basic
 
 open_locale big_operators
 
@@ -478,7 +479,15 @@ begin
     {sorry},
     apply le_trans goal1,
     clear goal1,
-    
+    have goal2 : (∑ i : (finset.Iio (n₀.digits n).length), ((n₀ : ℝ) ^ α) ^ (i : ℕ)) =
+    (((n₀ : ℝ) ^ (α * (n₀.digits n).length)) * 
+      ∑ i : (finset.Iio (n₀.digits n).length), ((n₀ : ℝ) ^ α) ^ (i : ℕ)),
+    {sorry},
+    rw goal2,
+    clear goal2,
+    -- I don't know wether power_series is good or not here.
+    -- let p : power_series ℝ := power_series.mk (λ i, (1 / ((n₀ : ℝ) ^ α)) ^ (i : ℝ)),
+
     sorry },
   { congr',
     ext,
