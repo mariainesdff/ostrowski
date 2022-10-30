@@ -449,11 +449,13 @@ begin
     { have hn₀ := nat.find_spec hf,
       rw ←dn₀ at hn₀,
       exact lt_trans zero_lt_one hn₀ } },
+  have hα : 0 ≤ α,
+  {sorry},
   let C : ℝ := ((n₀ : ℝ) ^ α) / ((n₀ : ℝ) ^ α - 1),
   have hC : 0 ≤ C,
   {sorry},
   suffices : ∀ n : ℕ, f n ≤ C * ((n : ℝ) ^ α),
-  {sorry},
+  {sorry}, -- Some limit staff here.
   intro n,
   conv_lhs { rw ←nat.of_digits_digits n₀ n },
   rw nat.of_digits_eq_sum_map_with_index,
@@ -511,12 +513,23 @@ begin
     rw mul_comm,
     suffices : (n₀ : ℝ) ^ (α * ((n₀.digits n).length)) ≤ (n : ℝ) ^ α,
     { nlinarith },
-    
-    sorry },
+    have goal : (n₀ : ℝ) ^ ((n₀.digits n).length : ℝ) ≤ (n : ℝ),
+    {sorry},
+    have stupid : (0 : ℝ) ≤ n₀ := sorry,
+    rw mul_comm,
+    rw real.rpow_mul stupid,
+    have stupid2 : 0 ≤ (n₀ : ℝ) ^ ((n₀.digits n).length : ℝ) := sorry,
+    exact real.rpow_le_rpow stupid2 goal hα },
   { congr',
     ext,
     rw [f_mul_eq, mul_eq_pow] }
 end
+
+example (a b c : ℝ) (h : 0 ≤ a) : a ^ (b * c) = (a ^ b) ^ c :=
+begin
+  
+  sorry
+end 
 
 -- This is lemma 1.2 (this looks hard btw)
 lemma aux3 {n₀ : ℕ} {α : ℝ} (hf : ∃ n : ℕ, 1 < f n) 
