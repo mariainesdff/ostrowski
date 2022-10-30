@@ -248,6 +248,7 @@ begin
     ... ≤ (∑ i in finset.range n, f (ι i)) + f (ι n) : add_le_add_right hn _ }
 end
 
+-- This should be the same as `Sum_le`
 lemma Sum_le' (n : ℕ) (ι : finset.Iio n → ℚ) :
   f (∑ i : finset.Iio n, ι i) ≤ ∑ i : finset.Iio n, f (ι i) := sorry
 
@@ -404,11 +405,11 @@ begin
   { simp [IH (λ i, f (i+1)), add_assoc], }
 end
 
+-- This should be the same as `list.map_with_index_sum_to_finset_sum`
 lemma list.map_with_index_sum_to_finset_sum' {β A : Type*} [add_comm_monoid A] {f : ℕ → β → A} 
   {L : list β}  [inhabited β] : (L.map_with_index f).sum = ∑ i : finset.Iio L.length, 
     f i ((L.nth_le i (finset.mem_Iio.1 i.2))) :=
 begin
-  
   sorry
 end
 
