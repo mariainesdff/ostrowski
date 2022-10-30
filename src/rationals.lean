@@ -12,6 +12,7 @@ import data.nat.digits
 import mul_ring_norm_rat
 import nonarchimedean
 import ring_theory.power_series.basic
+import analysis.specific_limits.normed
 
 open_locale big_operators
 
@@ -436,7 +437,6 @@ lemma aux2 {n₀ : ℕ} {α : ℝ} (hf : ∃ n : ℕ, 1 < f n)
   (dn₀ : n₀ = nat.find hf) (dα : α = real.log (f n₀) / real.log n₀) : 
     ∀ n : ℕ, f n ≤ n ^ α :=
 begin
-  intro n,
   have : f n₀ = n₀ ^ α,
   { rw [dα, real.log_div_log],
     apply eq.symm,
@@ -449,6 +449,12 @@ begin
     { have hn₀ := nat.find_spec hf,
       rw ←dn₀ at hn₀,
       exact lt_trans zero_lt_one hn₀ } },
+  let C : ℝ := ((n₀ : ℝ) ^ α) / ((n₀ : ℝ) ^ α - 1),
+  have hC : 0 ≤ C,
+  {sorry},
+  suffices : ∀ n : ℕ, f n ≤ C * ((n : ℝ) ^ α),
+  {sorry},
+  intro n,
   conv_lhs { rw ←nat.of_digits_digits n₀ n },
   rw nat.of_digits_eq_sum_map_with_index,
   rw list.map_with_index_sum_to_finset_sum',
@@ -486,27 +492,31 @@ begin
     {sorry},
     rw goal2,
     clear goal2,
-    -- I don't know wether power_series is good or not here.
-    -- let p : power_series ℝ := power_series.mk (λ i, (1 / ((n₀ : ℝ) ^ α)) ^ (i : ℝ)),
-
+    have goal3_aux : ∑ (i : (finset.Iio (n₀.digits n).length)),
+      ((n₀ : ℝ) ^ α) ^ (i : ℕ) ≤ ∑'i : ℕ, (1 / ((n₀ : ℝ) ^ α)) ^ i,
+    {sorry},
+    have aux' : 0 ≤ (n₀ : ℝ) ^ (α * ((n₀.digits n).length)),
+    {sorry},
+    have goal3 : ((n₀ : ℝ) ^ (α * ((n₀.digits n).length))) 
+      * (∑ (i : (finset.Iio (n₀.digits n).length)), ((n₀ : ℝ) ^ α) ^ (i : ℕ)) 
+        ≤ ((n₀ : ℝ) ^ (α * ((n₀.digits n).length))) * 
+          (∑'i : ℕ, (1 / ((n₀ : ℝ) ^ α)) ^ i),
+    {sorry},
+    apply le_trans goal3,
+    clear goal3_aux aux' goal3,
+    have goal4 : ∑'i : ℕ, (1 / ((n₀ : ℝ) ^ α)) ^ i = C,
+    {sorry},
+    rw goal4,
+    clear goal4,
+    rw mul_comm,
+    suffices : (n₀ : ℝ) ^ (α * ((n₀.digits n).length)) ≤ (n : ℝ) ^ α,
+    { nlinarith },
+    
     sorry },
   { congr',
     ext,
     rw [f_mul_eq, mul_eq_pow] }
 end
-
-/--
-      have : ((n₀.digits n).nth i).get_or_else default < n₀,
-      { by_cases h : i < (n₀.digits n).length,
-        { sorry },
-        { simp at h,
-          
-          sorry } },
-      apply le_of_not_gt,
-      rw dn₀ at this ⊢,
-      rw gt_iff_lt,
-      exact nat.find_min hf this
--/
 
 -- This is lemma 1.2 (this looks hard btw)
 lemma aux3 {n₀ : ℕ} {α : ℝ} (hf : ∃ n : ℕ, 1 < f n) 
