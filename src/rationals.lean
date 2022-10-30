@@ -545,12 +545,6 @@ begin
     rw [f_mul_eq, mul_eq_pow] }
 end
 
-example (a b c : ℝ) (h : 0 ≤ a) : a ^ (b * c) = (a ^ b) ^ c :=
-begin
-  
-  sorry
-end 
-
 -- This is lemma 1.2 (this looks hard btw)
 lemma aux3 {n₀ : ℕ} {α : ℝ} (hf : ∃ n : ℕ, 1 < f n) 
   (dn₀ : n₀ = nat.find hf) (dα : α = real.log (f n₀) / real.log n₀) : 
