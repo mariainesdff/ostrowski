@@ -424,8 +424,7 @@ lemma aux2 {n₀ : ℕ} {α : ℝ} (hf : ∃ n : ℕ, 1 < f n)
 begin
   intro n,
   have : f n₀ = n₀ ^ α,
-  { rw dα,
-    rw real.log_div_log,
+  { rw [dα, real.log_div_log],
     apply eq.symm,
     apply real.rpow_logb,
     { norm_cast,
