@@ -481,7 +481,7 @@ begin
   { subst h,
     simp [hα],
     nlinarith [hC, real.zero_rpow_nonneg α] },
-  have length_lt_one : 0 ≤ ((n₀.digits n).length : ℝ) - 1,
+  have length_lt_one : 0 ≤ ((n₀.digits n).length : ℝ) - 1, -- Not sure whether this is useful or not
   { norm_num,
 
     sorry}, -- should be easy `digits_ne_nil_iff_ne_zero` might be useful
