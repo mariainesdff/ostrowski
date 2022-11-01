@@ -14,7 +14,6 @@ import nonarchimedean
 import ring_theory.power_series.basic
 import analysis.specific_limits.normed
 import topology.algebra.order.basic
-import tactic.qify
 
 open_locale big_operators
 
@@ -581,9 +580,12 @@ begin
   let C : ℝ := (1 - (1 - 1 / n₀) ^ α),
   have hC : 0 ≤ C,
   {sorry}, -- Maybe useful later and easy to do
-  suffices : ∀ n : ℕ, C * ((n : ℝ) ^ α) ≤ f n,
+  suffices : ∀ n : ℕ, n ≠ 0 → C * ((n : ℝ) ^ α) ≤ f n, -- It seems to me that we need n ≠ 0 here.
   {sorry},
-  intro n,
+  intros n hn,
+  have length_lt_one : 0 ≤ ((n₀.digits n).length : ℝ) - 1, -- Not sure whether this is useful or not
+  { norm_num,
+    sorry}, -- should be easy `digits_ne_nil_iff_ne_zero` might be useful
   have h₁ : f ((n₀ : ℚ) ^ ((n₀.digits n).length)) 
     - f (((n₀ : ℚ) ^ ((n₀.digits n).length)) - n) ≤ f n,
   {sorry},
@@ -591,9 +593,19 @@ begin
   rw [mul_eq_pow, this],
   have h := aux2 hf dn₀ dα,
   specialize h ((n₀ ^ ((n₀.digits n).length)) - n),
-  have h₀ : 0 ≤ n₀ ^ (n₀.digits n).length - n,
-  {sorry}, -- maybe useful
-  
+  --have h₀ : 0 ≤ n₀ ^ (n₀.digits n).length - n,
+  --{sorry}, -- maybe useful
+  --have stupid_cast : ((n₀ ^ (n₀.digits n).length - n) : ℚ)
+  --  = ((n₀ : ℚ) ^ (n₀.digits n).length - (n : ℚ)) := rfl, -- this seems useless
+  have h₂ : ((n₀ : ℝ) ^ α) ^ (n₀.digits n).length - ((n₀ ^ (n₀.digits n).length - n) : ℚ) ^ α ≤
+  ((n₀ : ℝ) ^ α) ^ (n₀.digits n).length - f ((n₀ : ℚ) ^ (n₀.digits n).length - (n : ℚ)),
+  {sorry},
+  apply le_trans' h₂,
+  clear h₂,
+  simp only [rat.cast_sub, rat.cast_pow, rat.cast_coe_nat],
+  have length_lt_one : 0 ≤ ((n₀.digits n).length : ℝ) - 1, -- Not sure whether this is useful or not
+  { norm_num,
+    sorry}, -- should be easy `digits_ne_nil_iff_ne_zero` might be useful
 
   sorry
 end
