@@ -14,6 +14,7 @@ import nonarchimedean
 import ring_theory.power_series.basic
 import analysis.specific_limits.normed
 import topology.algebra.order.basic
+import tactic.qify
 
 open_locale big_operators
 
@@ -462,7 +463,7 @@ begin
     have limit'' : filter.tendsto 
       (λ N : ℕ, (C ^ (1 / (N : ℝ))) * (n ^ α)) filter.at_top (nhds (n ^ α)),
     {sorry}, --someone good at analysis
-    have stupid : (0 : ℝ) ≤ n := sorry, -- very easy
+    have stupid : (0 : ℝ) ≤ n := by norm_cast; exact zero_le n, -- very easy
     have aux : ∀ N : ℕ, (f (n)) ^ (N : ℝ) ≤ C * ((n ^ α) ^ (N : ℝ)),
     { intro N,
       rw ←real.rpow_mul stupid,
@@ -483,7 +484,6 @@ begin
     nlinarith [hC, real.zero_rpow_nonneg α] },
   have length_lt_one : 0 ≤ ((n₀.digits n).length : ℝ) - 1, -- Not sure whether this is useful or not
   { norm_num,
-
     sorry}, -- should be easy `digits_ne_nil_iff_ne_zero` might be useful
   conv_lhs { rw ←nat.of_digits_digits n₀ n },
   rw nat.of_digits_eq_sum_map_with_index,
@@ -573,7 +573,30 @@ end
 -- This is lemma 1.2 (this looks hard btw)
 lemma aux3 {n₀ : ℕ} {α : ℝ} (hf : ∃ n : ℕ, 1 < f n) 
   (dn₀ : n₀ = nat.find hf) (dα : α = real.log (f n₀) / real.log n₀) : 
-    ∀ n : ℕ, (n ^ α : ℝ) ≤ f n := sorry
+    ∀ n : ℕ, (n ^ α : ℝ) ≤ f n :=
+begin
+  have : f n₀ = n₀ ^ α := sorry, -- same proof as above
+  have hα : 0 ≤ α,
+  {sorry}, -- Maybe useful later and easy to do
+  let C : ℝ := (1 - (1 - 1 / n₀) ^ α),
+  have hC : 0 ≤ C,
+  {sorry}, -- Maybe useful later and easy to do
+  suffices : ∀ n : ℕ, C * ((n : ℝ) ^ α) ≤ f n,
+  {sorry},
+  intro n,
+  have h₁ : f ((n₀ : ℚ) ^ ((n₀.digits n).length)) 
+    - f (((n₀ : ℚ) ^ ((n₀.digits n).length)) - n) ≤ f n,
+  {sorry},
+  apply le_trans' h₁,
+  rw [mul_eq_pow, this],
+  have h := aux2 hf dn₀ dα,
+  specialize h ((n₀ ^ ((n₀.digits n).length)) - n),
+  have h₀ : 0 ≤ n₀ ^ (n₀.digits n).length - n,
+  {sorry}, -- maybe useful
+  
+
+  sorry
+end
 
 
 lemma archimedean_case (hf : ¬ is_nonarchimedean f) : mul_ring_norm.equiv f mul_ring_norm.real :=
