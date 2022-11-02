@@ -581,7 +581,7 @@ begin
   have hC : 0 ≤ C,
   {sorry}, -- Maybe useful later and easy to do
   suffices : ∀ n : ℕ, n ≠ 0 → C * ((n : ℝ) ^ α) ≤ f n, -- It seems to me that we need n ≠ 0 here.
-  {sorry},
+  {sorry}, -- This should be almost the same as above
   intros n hn,
   have length_lt_one : 0 ≤ ((n₀.digits n).length : ℝ) - 1, -- Not sure whether this is useful or not
   { norm_num,
@@ -593,10 +593,6 @@ begin
   rw [mul_eq_pow, this],
   have h := aux2 hf dn₀ dα,
   specialize h ((n₀ ^ ((n₀.digits n).length)) - n),
-  --have h₀ : 0 ≤ n₀ ^ (n₀.digits n).length - n,
-  --{sorry}, -- maybe useful
-  --have stupid_cast : ((n₀ ^ (n₀.digits n).length - n) : ℚ)
-  --  = ((n₀ : ℚ) ^ (n₀.digits n).length - (n : ℚ)) := rfl, -- this seems useless
   have h₂ : ((n₀ : ℝ) ^ α) ^ (n₀.digits n).length - ((n₀ ^ (n₀.digits n).length - n) : ℚ) ^ α ≤
   ((n₀ : ℝ) ^ α) ^ (n₀.digits n).length - f ((n₀ : ℚ) ^ (n₀.digits n).length - (n : ℚ)),
   {sorry},
@@ -606,7 +602,7 @@ begin
   have length_lt_one : 0 ≤ ((n₀.digits n).length : ℝ) - 1, -- Not sure whether this is useful or not
   { norm_num,
     sorry}, -- should be easy `digits_ne_nil_iff_ne_zero` might be useful
-
+  
   sorry
 end
 
