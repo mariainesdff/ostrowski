@@ -627,30 +627,30 @@ end
 
 lemma archimedean_case (hf : ¬ is_nonarchimedean f) : mul_ring_norm.equiv f mul_ring_norm.real :=
 begin
-  /-rw ←non_archimedean_iff_nat_norm_bound hf_mul at hf,
-  push_neg at hf,
-  set n₀ := nat.find hf with dn₀,
-  have hn₀ := nat.find_spec hf,
-  rw ←dn₀ at hn₀,
-  have n0gt1 : 1 < n₀,
-  { by_contra',
-    rw lt_iff_not_ge at hn₀,
-    interval_cases n₀,
-    { apply hn₀,
-      simp [h] },
-    { apply hn₀,
-      simp [h, norm_one_eq_one hf_mul] } },
-  use (real.log (f n₀)) / (real.log n₀),
-  split,
-  { rw div_eq_inv_mul,
-    apply right.mul_pos,
-    { rw inv_pos,
-      exact real.log_pos (by { norm_cast, exact n0gt1 }) },
-    { exact real.log_pos hn₀ } },
-  have lemma1 : ∀ n : ℕ, f n ≤ n ^ ((real.log (f n₀)) / (real.log n₀)),
-  {  } -/
-  sorry
+  rw ←non_archimedean_iff_nat_norm_bound at hf,
+  simp only [not_forall, not_le] at hf,
+  let n₀ : ℕ := nat.find hf,
+  have dn₀ : n₀ = nat.find hf := rfl,
+  let α : ℝ := real.log (f n₀) / real.log n₀,
+  have hα : α =  real.log (f n₀) / real.log n₀ := rfl,
+  have h₁ := aux3 hf dn₀ hα,
+  have h₂ := aux2 hf dn₀ hα,
+  have h₃ : ∀ (n : ℕ), f (n : ℚ) = (n : ℝ) ^ α,
+  {sorry}, -- easy just combine h₁ and h₂
+  have h₄ : ∀ (n : ℕ), f (n : ℚ) = |n| ^ α,
+  {sorry}, -- use h₃
+  clear h₁ h₂ h₃,
+  apply mul_ring_norm.equiv_symm _ _,
+  refine ⟨α, _, _⟩,
+  {sorry}, -- 0 ≤ α easy to do
+  { ext,
+    rw mul_ring_norm_eq_abs,
+
+    sorry},
 end
+
+-- Looking for something like this in mathlib
+example (q : ℚ) : ∃ (a b : ℤ), q = (a : ℚ) / (b : ℚ) := sorry
 
 end archimedean
 
