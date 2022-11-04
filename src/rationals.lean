@@ -575,8 +575,6 @@ lemma aux3 {n₀ : ℕ} {α : ℝ} (hf : ∃ n : ℕ, 1 < f n)
     ∀ n : ℕ, (n ^ α : ℝ) ≤ f n :=
 begin
   have : f n₀ = n₀ ^ α := sorry, -- same proof as above
-  have hα : 0 ≤ α,
-  {sorry}, -- Maybe useful later and easy to do
   let C : ℝ := (1 - (1 - 1 / n₀) ^ α),
   have hC : 0 ≤ C,
   {sorry}, -- Maybe useful later and easy to do
@@ -602,8 +600,28 @@ begin
   have length_lt_one : 0 ≤ ((n₀.digits n).length : ℝ) - 1, -- Not sure whether this is useful or not
   { norm_num,
     sorry}, -- should be easy `digits_ne_nil_iff_ne_zero` might be useful
-  
-  sorry
+  have h₃ : ((n₀ : ℝ) ^ α) ^ (n₀.digits n).length - ((n₀ : ℝ) ^ (n₀.digits n).length - (n₀ : ℝ) ^ ((n₀.digits n).length - 1)) ^ α ≤
+    ((n₀ : ℝ) ^ α) ^ (n₀.digits n).length - ((n₀ : ℝ) ^ (n₀.digits n).length - (n : ℝ)) ^ α,
+  {sorry},
+  apply le_trans' h₃,
+  clear h₃,
+  have h₄ : ((n₀ : ℝ) ^ α) ^ (n₀.digits n).length - ((n₀ : ℝ) ^ (n₀.digits n).length - (n₀ : ℝ) ^ ((n₀.digits n).length - 1)) ^ α =
+    (((n₀ : ℝ) ^ α) ^ (n₀.digits n).length) * (1 - (1 - 1 / n₀) ^ α),
+  {sorry},
+  rw h₄,
+  clear h₄,
+  change (1 - (1 - 1 / (n₀ : ℝ)) ^ α) with C,
+  nth_rewrite 1 mul_comm,
+  apply mul_le_mul_of_nonneg_left _ hC,
+  suffices goal : (n : ℝ )^ α ≤ ((n₀ : ℝ) ^ (n₀.digits n).length) ^ α,
+  {sorry},
+  have aux' : 2 ≤ n₀ := by linarith [aux1 hf dn₀],
+  apply real.rpow_le_rpow,
+  { norm_cast,
+    exact nat.zero_le n },
+  { norm_cast,
+    linarith [@nat.lt_base_pow_length_digits _ n aux'] },
+  { sorry } -- 0 ≤ α easy to do
 end
 
 
