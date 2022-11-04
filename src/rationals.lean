@@ -74,6 +74,10 @@ end padic
 
 variable {f : mul_ring_norm ℚ}
 
+-- This lemma is missing in the mathlib I think.
+lemma mul_ring_norm.neg {R : Type*} [non_assoc_ring R] {f : mul_ring_norm R} 
+  (a : R) : f (-a) = f a := f.neg' a
+
 section non_archimedean
 
 -- Show that 𝔞 is an ideal
@@ -639,18 +643,38 @@ begin
   {sorry}, -- easy just combine h₁ and h₂
   have h₄ : ∀ (n : ℕ), f (n : ℚ) = |n| ^ α,
   {sorry}, -- use h₃
-  clear h₁ h₂ h₃,
+  clear h₁ h₂,
   apply mul_ring_norm.equiv_symm _ _,
   refine ⟨α, _, _⟩,
   {sorry}, -- 0 ≤ α easy to do
   { ext,
+    by_cases x.denom = 0,
+    {sorry}, --easy
     rw mul_ring_norm_eq_abs,
-
-    sorry},
+    rw ←rat.num_div_denom x,
+    norm_cast,
+    rw ←rat.coe_int_div_eq_mk,
+    rw abs_div,
+    push_cast,
+    rw ring_norm.div_eq,
+    { rw real.div_rpow,
+      { congr,
+        { cases x.num with b b,
+          { simp only [int.of_nat_eq_coe, int.cast_coe_nat],
+            exact (h₄ b).symm },
+          { simp only [int.cast_neg_succ_of_nat, nat.cast_add, algebra_map.coe_one,
+              neg_add_rev],
+            rw ←abs_neg,
+            rw ←mul_ring_norm.neg,
+            simp only [neg_add_rev, neg_neg],
+            norm_cast,
+            exact (h₃ (b + 1)).symm } },
+        { exact (h₄ x.denom).symm } },
+      {sorry}, --easy
+      {sorry} }, --easy same as the above one
+    { norm_cast,
+      exact h } },
 end
-
--- Looking for something like this in mathlib
-example (q : ℚ) : ∃ (a b : ℤ), q = (a : ℚ) / (b : ℚ) := sorry
 
 end archimedean
 
@@ -659,9 +683,11 @@ theorem rat_ring_norm_p_adic_or_real (f : mul_ring_norm ℚ) (hf_nontriv : f ≠
   (mul_ring_norm.equiv f mul_ring_norm.real) ∨
   ∃ (p : ℕ) [hp : fact (nat.prime p)], mul_ring_norm.equiv f (@mul_ring_norm.padic p hp) :=
 begin
-    by_cases bdd : ∀ z : ℤ, f z ≤ 1,
+    by_cases bdd : ∀ z : ℕ, f z ≤ 1,
     { right, /- p-adic case -/
-      rw [←int_norm_bound_iff_nat_norm_bound, non_archimedean_iff_nat_norm_bound] at bdd,
+      rw [non_archimedean_iff_nat_norm_bound] at bdd,
       exact f_equiv_padic bdd hf_nontriv },
-    { sorry /- Euclidean case -/ }
+    { left,
+      rw non_archimedean_iff_nat_norm_bound at bdd,
+      exact archimedean_case bdd, /- Euclidean case -/ }
 end
