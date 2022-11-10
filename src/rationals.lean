@@ -648,8 +648,6 @@ begin
   refine ⟨α, _, _⟩,
   {sorry}, -- 0 ≤ α easy to do
   { ext,
-    by_cases x.denom = 0,
-    {sorry}, --easy
     rw mul_ring_norm_eq_abs,
     rw ←rat.num_div_denom x,
     norm_cast,
@@ -670,10 +668,10 @@ begin
             norm_cast,
             exact (h₃ (b + 1)).symm } },
         { exact (h₄ x.denom).symm } },
-      {sorry}, --easy
-      {sorry} }, --easy same as the above one
+      { exact norm_nonneg ((x.num) : ℝ) },
+      { exact norm_nonneg ((x.denom) : ℝ) } },
     { norm_cast,
-      exact h } },
+      exact rat.denom_ne_zero x } },
 end
 
 end archimedean
