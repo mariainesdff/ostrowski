@@ -455,7 +455,7 @@ begin
       rw ←dn₀ at hn₀,
       exact lt_trans zero_lt_one hn₀ } },
   have hα : 0 ≤ α,
-  {sorry}, --easy
+  {sorry}, --easy (Billy's TODO)
   let C : ℝ := ((n₀ : ℝ) ^ α) / ((n₀ : ℝ) ^ α - 1),
   have hC : 0 ≤ C,
   {sorry}, -- easy to do
@@ -625,9 +625,8 @@ begin
     exact nat.zero_le n },
   { norm_cast,
     linarith [@nat.lt_base_pow_length_digits _ n aux'] },
-  { sorry } -- 0 ≤ α easy to do
+  { sorry } -- 0 ≤ α easy to do (Billy's TODO)
 end
-
 
 lemma archimedean_case (hf : ¬ is_nonarchimedean f) : mul_ring_norm.equiv f mul_ring_norm.real :=
 begin
@@ -637,16 +636,17 @@ begin
   have dn₀ : n₀ = nat.find hf := rfl,
   let α : ℝ := real.log (f n₀) / real.log n₀,
   have hα : α =  real.log (f n₀) / real.log n₀ := rfl,
-  have h₁ := aux3 hf dn₀ hα,
-  have h₂ := aux2 hf dn₀ hα,
   have h₃ : ∀ (n : ℕ), f (n : ℚ) = (n : ℝ) ^ α,
-  {sorry}, -- easy just combine h₁ and h₂
+  { intro n,
+    linarith [aux3 hf dn₀ hα n, aux2 hf dn₀ hα n] },
   have h₄ : ∀ (n : ℕ), f (n : ℚ) = |n| ^ α,
-  {sorry}, -- use h₃
-  clear h₁ h₂,
+  { intro n,
+    rw nat.abs_cast n,
+    exact h₃ n },
   apply mul_ring_norm.equiv_symm _ _,
   refine ⟨α, _, _⟩,
-  {sorry}, -- 0 ≤ α easy to do
+  { 
+    sorry}, -- 0 ≤ α easy to do (Billy's TODO)
   { ext,
     rw mul_ring_norm_eq_abs,
     rw ←rat.num_div_denom x,
