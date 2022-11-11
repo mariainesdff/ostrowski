@@ -586,6 +586,16 @@ lemma aux3 {n₀ : ℕ} {α : ℝ} (hf : ∃ n : ℕ, 1 < f n)
   (dn₀ : n₀ = nat.find hf) (dα : α = real.log (f n₀) / real.log n₀) : 
     ∀ n : ℕ, (n ^ α : ℝ) ≤ f n :=
 begin
+  have hα : 0 ≤ α,
+  { rw dα,
+    apply le_of_lt,
+    apply div_pos,
+    { apply real.log_pos,
+      rw dn₀,
+      exact nat.find_spec hf },
+    { apply real.log_pos,
+      norm_cast,
+      exact aux1 hf dn₀ } },
   have : f n₀ = n₀ ^ α := sorry, -- same proof as above
   let C : ℝ := (1 - (1 - 1 / n₀) ^ α),
   have hC : 0 ≤ C,
@@ -593,9 +603,8 @@ begin
   suffices : ∀ n : ℕ, n ≠ 0 → C * ((n : ℝ) ^ α) ≤ f n, -- It seems to me that we need n ≠ 0 here.
   {sorry}, -- This should be almost the same as above
   intros n hn,
-  have length_lt_one : 0 ≤ ((n₀.digits n).length : ℝ) - 1, -- Not sure whether this is useful or not
-  { norm_num,
-    sorry}, -- should be easy `digits_ne_nil_iff_ne_zero` might be useful
+  have length_lt_one : 1 ≤ (n₀.digits n).length, -- Not sure whether this is useful or not
+  {sorry}, -- should be easy `digits_ne_nil_iff_ne_zero` might be useful
   have h₁ : f ((n₀ : ℚ) ^ ((n₀.digits n).length)) 
     - f (((n₀ : ℚ) ^ ((n₀.digits n).length)) - n) ≤ f n,
   {sorry},
@@ -609,39 +618,66 @@ begin
   apply le_trans' h₂,
   clear h₂,
   simp only [rat.cast_sub, rat.cast_pow, rat.cast_coe_nat],
-  have length_lt_one : 0 ≤ ((n₀.digits n).length : ℝ) - 1, -- Not sure whether this is useful or not
-  { norm_num,
-    sorry}, -- should be easy `digits_ne_nil_iff_ne_zero` might be useful
   have h₃ : ((n₀ : ℝ) ^ α) ^ (n₀.digits n).length - ((n₀ : ℝ) ^ (n₀.digits n).length - (n₀ : ℝ) ^ ((n₀.digits n).length - 1)) ^ α ≤
     ((n₀ : ℝ) ^ α) ^ (n₀.digits n).length - ((n₀ : ℝ) ^ (n₀.digits n).length - (n : ℝ)) ^ α,
   {sorry},
   apply le_trans' h₃,
   clear h₃,
-  have h₄ : ((n₀ : ℝ) ^ α) ^ (n₀.digits n).length - ((n₀ : ℝ) ^ (n₀.digits n).length - (n₀ : ℝ) ^ ((n₀.digits n).length - 1)) ^ α =
-    (((n₀ : ℝ) ^ α) ^ (n₀.digits n).length) * (1 - (1 - 1 / n₀) ^ α),
-  {sorry},
+  have h₄ : ((n₀ : ℝ) ^ α) ^ (n₀.digits n).length - 
+    ((n₀ : ℝ) ^ (n₀.digits n).length - (n₀ : ℝ) ^ ((n₀.digits n).length - 1)) ^ α 
+      = (((n₀ : ℝ) ^ α) ^ (n₀.digits n).length) * (1 - (1 - 1 / n₀) ^ α),
+  { rw mul_sub,
+    rw mul_one,
+    rw sub_right_inj,
+    repeat {rw ←real.rpow_nat_cast},
+    rw ←real.rpow_mul,  -- This looks stupid here, as I am looking for (a ^ b) ^ c = (a ^ c) ^ b
+    { nth_rewrite 1 mul_comm,
+      rw real.rpow_mul,
+      { rw ←real.mul_rpow,
+        { rw mul_sub,
+          rw mul_one,
+          rw nat.cast_sub length_lt_one,
+          rw real.rpow_sub,
+          { ring_nf,
+            simp only [algebra_map.coe_one, real.rpow_one] },
+          norm_cast,
+          linarith [aux1 hf dn₀] },
+        { norm_cast,
+          linarith [nat.one_le_pow ((n₀.digits n).length) 
+            n₀ (by linarith [aux1 hf dn₀])] },
+        { simp only [sub_nonneg],
+          rw one_div_le,
+          { simp only [div_self, ne.def, one_ne_zero, not_false_iff, nat.one_le_cast],
+            linarith [aux1 hf dn₀] },
+          { norm_cast,
+            linarith [aux1 hf dn₀] },
+          { linarith } } },
+      norm_cast,
+      exact nat.zero_le n₀ },
+    norm_cast,
+    exact nat.zero_le n₀ },
   rw h₄,
   clear h₄,
   change (1 - (1 - 1 / (n₀ : ℝ)) ^ α) with C,
   nth_rewrite 1 mul_comm,
   apply mul_le_mul_of_nonneg_left _ hC,
   suffices goal : (n : ℝ )^ α ≤ ((n₀ : ℝ) ^ (n₀.digits n).length) ^ α,
-  {sorry},
+  { rw ←real.rpow_nat_cast at goal ⊢,
+    rw ←real.rpow_mul, -- This looks stupid here, as I am looking for (a ^ b) ^ c = (a ^ c) ^ b
+    { rw mul_comm,
+      rw real.rpow_mul,
+      { exact goal },
+      norm_cast,
+      exact nat.zero_le n₀ },
+    norm_cast,
+    exact nat.zero_le n₀ },
   have aux' : 2 ≤ n₀ := by linarith [aux1 hf dn₀],
   apply real.rpow_le_rpow,
   { norm_cast,
     exact nat.zero_le n },
   { norm_cast,
     linarith [@nat.lt_base_pow_length_digits _ n aux'] },
-  { rw dα,
-    apply le_of_lt,
-    apply div_pos,
-    { apply real.log_pos,
-      rw dn₀,
-      exact nat.find_spec hf },
-    { apply real.log_pos,
-      norm_cast,
-      exact aux1 hf dn₀ } }
+  { exact hα }
 end
 
 lemma archimedean_case (hf : ¬ is_nonarchimedean f) : mul_ring_norm.equiv f mul_ring_norm.real :=
