@@ -29,20 +29,89 @@ def ring_norm.infty (K : Type*) [field K] [decidable_eq (ratfunc K)] (c : ℝ) (
 { to_fun    := λ r, if r = 0 then 0 else c ^ r.int_degree,
   map_zero' := sorry,
   add_le'   := sorry,
-  neg'      := sorry,
-  eq_zero_of_map_eq_zero' := sorry,
-  mul_le'   := sorry }
+  neg'      := λ r,
+  begin
+    by_cases r = 0,
+    { simp only [h, neg_zero] } ,
+    { have h₁ : ¬ -r = 0,
+      { intro h₁,
+        apply h,
+        exact neg_eq_zero.1 h₁ },
+      simp only [h, h₁, ratfunc.int_degree_neg] }
+  end,
+  eq_zero_of_map_eq_zero' := λ x hx,
+  begin
+    by_contra,
+    simp only [h, if_false] at hx,
+    linarith [zpow_eq_zero hx],
+  end,
+  mul_le'   := λ x y,
+  begin
+    by_cases x * y = 0,
+    { simp only [h, eq_self_iff_true, if_true, ite_mul, mul_ite, mul_zero, zero_mul],
+      rw mul_eq_zero at h,
+      cases h,
+      { simp only [h, eq_self_iff_true, if_true, if_t_t] },
+      { simp only [h, eq_self_iff_true, if_true] } },
+    { simp only [h, if_false, ite_mul, mul_ite, mul_zero, zero_mul],
+      rw mul_eq_zero at h,
+      rw not_or_distrib at h,
+      cases h with h₁ h₂,
+      simp only [h₁, h₂, if_false],
+      rw ratfunc.int_degree_mul h₁ h₂,
+      apply eq.le,
+      repeat {rw ←real.rpow_int_cast},
+      push_cast,
+      exact real.rpow_add hc_pos _ _ }
+  end }
 
+@[simp] lemma ring_norm.infty_def (K : Type*) [field K] [decidable_eq (ratfunc K)] (c : ℝ) 
+  (hc_pos : 0 < c) (hc_one_lt : 1 < c) (r : ratfunc K):
+    ring_norm.infty K c hc_pos hc_one_lt r = if r = 0 then 0 else c ^ r.int_degree := rfl
 
 lemma ring_norm.infty_mul_eq (K : Type*) [field K] [decidable_eq (ratfunc K)] (c : ℝ)
   (hc_pos : 0 < c) (hc_one_lt : 1 < c) :
   mul_eq (ring_norm.infty K c hc_pos hc_one_lt) :=
-sorry
+begin
+  intros r s,
+  simp only [ring_norm.infty_def, mul_eq_zero, ite_mul, mul_ite, mul_zero, zero_mul],
+  by_cases r = 0 ∨ s = 0,
+  { simp only [h, if_true],
+    cases h,
+    { simp only [h, eq_self_iff_true, if_true, if_t_t] },
+    { simp only [h, eq_self_iff_true, if_true] } },
+  { simp only [h, if_false],
+    rw not_or_distrib at h,
+    cases h with h₁ h₂,
+    simp only [h₁, h₂, if_false],
+    rw ratfunc.int_degree_mul h₁ h₂,
+    repeat {rw ←real.rpow_int_cast},
+    push_cast,
+    exact real.rpow_add hc_pos _ _ }
+end
 
 lemma ring_norm.infty_is_nonarchimedean (K : Type*) [field K] [decidable_eq (ratfunc K)] (c : ℝ)
   (hc_pos : 0 < c) (hc_one_lt : 1 < c) :
   is_nonarchimedean (ring_norm.infty K c hc_pos hc_one_lt) :=
-sorry
+begin
+  intros r s,
+  simp only [ring_norm.infty_def, le_max_iff],
+  by_cases r + s = 0,
+  { simp only [h, eq_self_iff_true, if_true],
+    sorry},
+  { simp only [h, if_false],
+    by_cases h₁ : r = 0,
+    { right,
+      have h₂ : ¬ s = 0,
+      { intro h₃,
+        apply h,
+        simp only [h₁, h₃, add_zero] },
+      simp only [h₁, h₂, zero_add, if_false] },
+    { have h₂ : ¬ s = 0 := sorry, -- this is false,
+      simp only [h₁, h₂, if_false],
+      
+      sorry} }
+end
 
 end infty
 
@@ -80,7 +149,7 @@ sorry
 
 end adic
 
-/-- Ostrowski's Theorem -/
+/- Ostrowski's Theorem 
 theorem rat_ring_norm_p_adic_or_real (K : Type*) [field K] [decidable_eq (ratfunc K)]
   (c : ℝ) (hc_pos : 0 < c) (hc_one_lt : 1 < c) (f : ring_norm (ratfunc K))
   (hf_nontriv : f ≠ 1) (hf_triv_K : ∀ {x : K} (hx : x ≠ 0), f (ratfunc.C x) = 1)
@@ -91,3 +160,4 @@ theorem rat_ring_norm_p_adic_or_real (K : Type*) [field K] [decidable_eq (ratfun
 begin
   sorry
 end
+-/
