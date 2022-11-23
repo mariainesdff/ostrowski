@@ -192,10 +192,7 @@ begin
       repeat {rw ←real.rpow_int_cast},
       apply real.rpow_le_rpow_of_exponent_le,
       { linarith },
-      { norm_cast,
-        simp only [multiplicative.to_add_le],
-        
-        sorry} } }
+      { sorry } } }
 end
 
 end adic
