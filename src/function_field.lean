@@ -5,6 +5,8 @@ Authors: María Inés de Frutos-Fernández
 -/
 import field_theory.ratfunc
 import ring_theory.dedekind_domain.adic_valuation
+import data.polynomial.basic
+import analysis.special_functions.log.base
 import basic
 
 /-!
@@ -18,6 +20,8 @@ ring_norm, ostrowski
 -/
 
 noncomputable theory
+
+open polynomial
 
 open_locale polynomial
 
@@ -204,5 +208,25 @@ theorem rat_ring_norm_p_adic_or_real (K : Type*) [field K] [decidable_eq (ratfun
         ∃ (p : K[X]) [hp : irreducible p],
           mul_ring_norm.equiv f (@mul_ring_norm.adic K _ _ c hc_pos hc_one_lt p hp) :=
 begin
-  sorry
+  by_cases 1 < f (ratfunc.mk X 1),
+  { left,
+    let c₁ := 1 / f (ratfunc.mk X 1),
+    have h₁ : ∀ x : K[X], f (ratfunc.mk x 1) = c₁ ^ -((ratfunc.mk x 1).int_degree : ℝ),
+    {sorry},
+    refine ⟨real.logb c₁ c, _, _⟩,
+    {sorry}, -- 0 < real.logb c₁ c proved by 1 < c
+    { ext,
+      rw [mul_ring_norm.infty_def],
+      by_cases h₂ : x = 0,
+      {sorry},
+      { simp only [h₂, if_false],
+        have h₃ := h₁ (x.num),
+        specialize h₁ x.denom,
+        have h₄ : x = (ratfunc.mk x.num 1) / (ratfunc.mk x.denom 1),
+        {sorry},
+        rw h₄,
+        
+        sorry} } },
+  { right,
+    sorry}
 end
