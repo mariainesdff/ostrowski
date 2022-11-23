@@ -201,6 +201,5 @@ theorem rat_ring_norm_p_adic_or_real (K : Type*) [field K] [decidable_eq (ratfun
         ∃ (p : K[X]) [hp : irreducible p],
           mul_ring_norm.equiv f (@mul_ring_norm.adic K _ _ c hc_pos hc_one_lt p hp) :=
 begin
-  
   sorry
 end
