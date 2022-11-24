@@ -208,22 +208,46 @@ begin
   by_cases 1 < f (ratfunc.mk X 1),
   { left,
     let c₁ := 1 / f (ratfunc.mk X 1),
+    have hc₁ : 0 < c₁,
+    {sorry}, -- easy
+    have hc₂ : 0 ≤ c₁,
+    { linarith [hc₁] },
+    have hc₃ : c₁ ≠ 1,
+    {sorry}, -- easy as well
+    have hc : c ≠ 0,
+    { linarith },
+    have hc1 : 0 ≤ c,
+    { linarith },
     have h₁ : ∀ x : K[X], f (ratfunc.mk x 1) = c₁ ^ -((ratfunc.mk x 1).int_degree : ℝ),
-    {sorry},
-    refine ⟨real.logb c₁ c, _, _⟩,
-    {sorry}, -- 0 < real.logb c₁ c proved by 1 < c
+    {sorry}, -- main step here
+    refine ⟨-real.logb c₁ c, _, _⟩,
+    {sorry}, -- 0 < -real.logb c₁ c-
     { ext,
       rw [mul_ring_norm.infty_def],
       by_cases h₂ : x = 0,
-      {sorry},
+      {sorry}, -- easy
       { simp only [h₂, if_false],
         have h₃ := h₁ (x.num),
         specialize h₁ x.denom,
         have h₄ : x = (ratfunc.mk x.num 1) / (ratfunc.mk x.denom 1),
-        {sorry},
+        {sorry}, -- quite tricky here
         rw h₄,
-        
-        sorry} } },
+        have h₅ : f (ratfunc.mk x.num 1 / ratfunc.mk x.denom 1) = f (ratfunc.mk x.num 1) / f (ratfunc.mk x.denom 1),
+        {sorry}, -- This should be a separate lemma
+        rw h₅,
+        rw [h₁, h₃],
+        rw ←real.rpow_sub hc₁,
+        field_simp,
+        rw ←real.rpow_mul hc₂,
+        rw ←neg_mul_comm,
+        field_simp,
+        rw mul_comm,
+        rw real.rpow_mul hc₂,
+        rw real.rpow_logb_eq_abs hc₁ hc₃ hc,
+        rw abs_eq_self.2 hc1,
+        dsimp [ratfunc.int_degree],
+        rw ←real.rpow_int_cast,
+        push_cast } } },
   { right,
     sorry}
 end
