@@ -195,6 +195,29 @@ begin
       { sorry } } }
 end
 
+lemma mul_ring_norm.is_nonarchimedaen_eq_max_of_neq {R : Type*} [non_assoc_ring R] 
+  {f : mul_ring_norm R} (hf : is_nonarchimedean f) {r s : R} (h_neq : f r ≠ f s) : 
+    f (r + s) = max (f r) (f s) :=
+begin
+  have hf₁ := hf,
+  specialize hf r s,
+  cases ne.lt_or_lt h_neq with h₁ h₂,
+  { specialize hf₁ (r + s) (-r),
+    simp only [add_neg_cancel_comm, map_neg_eq_map, le_max_iff] at hf₁,
+    cases hf₁ with h₃ h₄,
+    { have hrs : f r ≤ f s := by linarith,
+      rw max_eq_right hrs at hf ⊢,
+      linarith },
+    { linarith } },
+  { specialize hf₁ (r + s) (-s),
+    simp only [add_neg_cancel_right, map_neg_eq_map, le_max_iff] at hf₁,
+    cases hf₁ with h₃ h₄,
+    { have hrs : f s ≤ f r := by linarith,
+      rw max_eq_left hrs at hf ⊢,
+      linarith },
+    { linarith } }
+end
+
 end adic
 
 /-- Ostrowski's Theorem -/
@@ -219,7 +242,9 @@ begin
     have hc1 : 0 ≤ c,
     { linarith },
     have h₁ : ∀ x : K[X], f (ratfunc.mk x 1) = c₁ ^ -((ratfunc.mk x 1).int_degree : ℝ),
-    {sorry}, -- main step here
+    { intro x,
+
+      sorry}, -- main step here
     refine ⟨-real.logb c₁ c, _, _⟩,
     {sorry}, -- 0 < -real.logb c₁ c-
     { ext,
