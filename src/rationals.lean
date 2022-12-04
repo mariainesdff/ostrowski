@@ -473,7 +473,7 @@ begin
     {sorry}, --someone good at analysis
     have limit'' : filter.tendsto 
       (λ N : ℕ, (C ^ (1 / (N : ℝ))) * (n ^ α)) filter.at_top (nhds (n ^ α)),
-    {sorry}, --someone good at analysis
+    {sorry}, --following from limit'
     have stupid : (0 : ℝ) ≤ n := by norm_cast; exact zero_le n, -- very easy
     have aux : ∀ N : ℕ, (f (n)) ^ (N : ℝ) ≤ C * ((n ^ α) ^ (N : ℝ)),
     { intro N,

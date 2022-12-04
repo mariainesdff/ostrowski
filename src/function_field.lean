@@ -23,7 +23,7 @@ noncomputable theory
 
 open polynomial
 
-open_locale polynomial
+open_locale polynomial big_operators
 
 section infty
 
@@ -220,6 +220,53 @@ end
 
 end adic
 
+-- https://math.stackexchange.com/questions/1748861/does-every-non-archimedean-absolute-value-satisfy-the-ultrametric-inequality/2011734#2011734
+lemma unknown_name2 {R : Type*} [non_assoc_ring R] {f : mul_ring_norm R} :
+  is_nonarchimedean f ↔ (∃ x : R, x ≠ 0 ∧ ∀ n : ℕ, f (n * x) ≤ 1) :=
+begin
+  split,
+  {sorry},
+  { intros hf y z,
+    obtain ⟨x, hx, hn⟩ := hf,
+    have hn1 : ∀ n : ℕ, f n * f x ≤ 1,
+    {sorry}, clear hn,
+    have hn2 : ∀ n : ℕ, f n ≤ 1 / (f x),
+    {sorry}, clear hn1,
+
+    sorry}
+end
+
+lemma unknown_name1 {K : Type*} [field K] [decidable_eq (ratfunc K)]
+  {f : mul_ring_norm (ratfunc K)} (hf_nontriv : f ≠ 1) 
+    (hf_triv_K : ∀ {x : K} (hx : x ≠ 0), f (ratfunc.C x) = 1) :
+      is_nonarchimedean f :=
+begin
+  rw unknown_name2,
+  refine ⟨1, _⟩,
+  simp only [ne.def, one_ne_zero, not_false_iff, mul_one, true_and],
+  intro n,
+  have hn1 : ratfunc.C (n : K) = (n : ratfunc K),
+  { simp only [map_nat_cast] },
+  by_cases h : (n : K) = 0,
+  { have hn : (n : ratfunc K) = 0,
+    { rw ← hn1,
+      rw h,
+      simp only [map_zero] },
+    rw hn,
+    simp only [map_zero, zero_le_one] },
+  { specialize hf_triv_K h,
+    rw hn1 at hf_triv_K,
+    rw hf_triv_K }
+end
+
+lemma unknown_name {R : Type*} [non_assoc_ring R] {f : mul_ring_norm R} 
+  (hf : is_nonarchimedean f) (s : finset ℕ) {g : ℕ → R} {a : ℕ}
+    (h_max : ∀ p : ℕ, f (g p) ≤ f (g a)) :
+      f (∑ p in s, g p) = f (g a) :=
+begin
+  sorry
+end
+
 /-- Ostrowski's Theorem -/
 theorem rat_ring_norm_p_adic_or_real (K : Type*) [field K] [decidable_eq (ratfunc K)]
   (c : ℝ) (hc_pos : 0 < c) (hc_one_lt : 1 < c) (f : mul_ring_norm (ratfunc K))
@@ -241,9 +288,39 @@ begin
     { linarith },
     have hc1 : 0 ≤ c,
     { linarith },
-    have h₁ : ∀ x : K[X], f (ratfunc.mk x 1) = c₁ ^ -((ratfunc.mk x 1).int_degree : ℝ),
+    have h₁ : ∀ x : K[X], f (ratfunc.mk x 1) = c₁ ^ -(x.nat_degree : ℝ),
     { intro x,
-
+      nth_rewrite 0 as_sum_support_C_mul_X_pow x,
+      have h₁ : ratfunc.mk (x.support.sum (λ (i : ℕ), C (x.coeff i) * X ^ i)) 1
+      = ∑ p in x.support, (ratfunc.mk (C (x.coeff p) * X ^ p) 1),
+      {sorry},
+      rw h₁, clear h₁,
+      have h₂ : ∀ (p : ℕ), f (ratfunc.mk (C (x.coeff p) * X ^ p) 1)
+        ≤ f (ratfunc.mk (C (x.coeff (nat_degree x)) * X ^ (nat_degree x)) 1),
+      {sorry},
+      have hf : is_nonarchimedean f,
+      { exact unknown_name1 hf_nontriv @hf_triv_K },
+      rw unknown_name hf (x.support) h₂,
+      clear h₂,
+      have h₃ : f (ratfunc.mk (C (x.coeff x.nat_degree) * X ^ x.nat_degree) 1)
+         = f (ratfunc.mk (C (x.coeff x.nat_degree)) 1) * f (ratfunc.mk (X ^ x.nat_degree) 1),
+      {sorry},
+      rw h₃,
+      clear h₃,
+      have h₄ : f (ratfunc.mk (C (x.coeff x.nat_degree)) 1) = 1,
+      {sorry},
+      rw h₄,
+      clear h₄,
+      rw one_mul,
+      have h₅ : f (ratfunc.mk (X ^ x.nat_degree) 1) = (f (ratfunc.mk X 1)) ^ (x.nat_degree),
+      {sorry},
+      rw h₅,
+      clear h₅,
+      dsimp [c₁],
+      rw one_div,
+      rw ←real.rpow_neg_one,
+      rw ←real.rpow_mul,
+      { simp only [neg_mul, one_mul, neg_neg, real.rpow_nat_cast] },
       sorry}, -- main step here
     refine ⟨-real.logb c₁ c, _, _⟩,
     {sorry}, -- 0 < -real.logb c₁ c-
