@@ -251,7 +251,9 @@ begin
   { intros H y z,
     obtain ⟨x, hx, hn⟩ := H,
     have hn1 : ∀ (n : ℕ), f n ≤ 1 / (f x),
-    {sorry},
+    { intro n,
+      
+      sorry},
     have hyz : ∀ (k : ℕ), f (y + z) ^ k ≤ ((k + 1) / f x) * max (f y) (f z) ^ k,
     { intro k,
       rw ← map_pow _ _ _,
@@ -277,14 +279,49 @@ begin
       { apply finset.sum_le_sum,
         intros i hi,
         apply div_le_div_of_le_of_nonneg,
-        { by_cases h : (f y) ≤ (f z),
-          { simp only [h, max_eq_right],
-            calc f y ^ i * f z ^ (k - i) ≤ f z ^ i * f z ^ (k - i) : sorry
-            ...                          = f z ^ (i + k - i) : sorry
-            ...                          = f z ^ k : sorry
+        { by_cases hyz : (f y) ≤ (f z),
+          { simp only [hyz, max_eq_right],
+            calc f y ^ i * f z ^ (k - i) ≤ f z ^ i * f z ^ (k - i) : 
+              begin 
+                apply mul_le_mul_of_nonneg_right,
+                { apply pow_le_pow_of_le_left,
+                  { simp only [map_nonneg] },
+                  { exact hyz } },
+                { apply pow_nonneg,
+                  simp only [map_nonneg] }
+              end
+            ...                          = f z ^ k :
+              begin
+                rw ← pow_add,
+                congr,
+                simp only [finset.mem_range] at hi,
+                have hi₁ : i ≤ k := by linarith,
+                zify,
+                ring,
+              end
           },
-          {sorry} },
-        {sorry} },
+          { have h₁ : f z ≤ f y := by linarith,
+            rw max_eq_left h₁,
+            calc f y ^ i * f z ^ (k - i) ≤ f y ^ i * f y ^ (k - i) : 
+              begin
+                apply mul_le_mul_of_nonneg_left,
+                { apply pow_le_pow_of_le_left,
+                  { simp only [map_nonneg] },
+                  { exact h₁ } },
+                { apply pow_nonneg,
+                  simp only [map_nonneg]}
+              end
+            ...                          = f y ^ k :
+              begin
+                rw ← pow_add,
+                congr,
+                simp only [finset.mem_range] at hi,
+                have hi₁ : i ≤ k := by linarith,
+                zify,
+                ring,
+              end
+          } },
+        { simp only [map_nonneg] } },
       apply le_trans h1,
       rw finset.sum_const ((max (f y) (f z)) ^ k / (f x)),
       simp only [finset.card_range, nsmul_eq_mul, nat.cast_add, algebra_map.coe_one],
