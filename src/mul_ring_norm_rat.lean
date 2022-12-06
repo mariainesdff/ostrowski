@@ -20,9 +20,11 @@ variable {f : mul_ring_norm ℚ}
 
 -- TODO: remove this
 -- I think this is a missing lemma in mathlib and maybe we can use this for now.
+-- (Done)
 lemma f_mul_eq : mul_eq f := f.map_mul'
 
 -- The norm of -1 is 1
+-- (Done)
 lemma norm_neg_one_eq_one : f (-1) = 1 :=
 begin
   have H₁ : f (-1) * f (-1) = 1,
@@ -40,10 +42,12 @@ begin
 end
 
 -- If x is non-zero, then the norm of x is larger than zero.
+-- (Done)
 lemma norm_pos_of_ne_zero {x : ℚ} (h : x ≠ 0) : f x > 0 :=
 lt_of_le_of_ne (map_nonneg f x) (λ h', h (f.eq_zero_of_map_eq_zero' x h'.symm))
 
 --TODO: generalise to division rings, get rid of field_simp
+-- (Done)
 lemma ring_norm.div_eq (p : ℚ) {q : ℚ} (hq : q ≠ 0) : f (p / q) = (f p) / (f q) :=
 begin
   have H : f q ≠ 0,
@@ -56,6 +60,7 @@ begin
 end
 
 -- This lemma look a bit strange to me.
+-- (Done)
 lemma int_norm_bound_iff_nat_norm_bound :
   (∀ n : ℕ, f n ≤ 1) ↔ (∀ z : ℤ, f z ≤ 1) :=
 begin
@@ -70,6 +75,7 @@ begin
     exact_mod_cast (h n) },
 end
 
+-- (Done)
 lemma mul_eq_pow {a : ℚ} {n : ℕ} : f (a ^ n) = (f a) ^ n :=
 begin
   induction n with d hd,

@@ -19,7 +19,8 @@ noncomputable theory
 
 variable {f : mul_ring_norm ℚ}
 
--- If the norm is nonarchimedean, then it's less than one for all naturals.
+-- If the norm is nonarchimedean, then it's less than one for all naturals. 
+-- (Done)
 lemma nat_norm_le_one (n : ℕ) (harc : is_nonarchimedean f) : f n ≤ 1 :=
 begin
   induction n with c hc,
@@ -32,10 +33,12 @@ begin
 end
 
 -- If the norm is nonarchimedean, then it's less than one for all integers.
+-- (Done)
 lemma int_norm_le_one (z : ℤ) (harc : is_nonarchimedean f) : f z ≤ 1 :=
 int_norm_bound_iff_nat_norm_bound.mp (λ n, nat_norm_le_one n harc) z
 
 -- If the norm is nonarchimedean, then nontrivial on ℚ implies nontrivial on ℕ.
+-- (Not sure whether should be in mathlib or not)
 lemma nat_nontriv_of_rat_nontriv (harc : is_nonarchimedean f) (hf : f ≠ 1): 
   ∃ n : ℕ, n ≠ 0 ∧ f n < 1 := 
 begin
@@ -100,6 +103,7 @@ begin
 end
 
 -- Show that there is a prime with norm < 1
+-- (Not sure whether should be in mathlib or not)
 lemma ex_prime_norm_lt_one (harc : is_nonarchimedean f) 
   (h : f ≠ 1) : ∃ (p : ℕ) [hp : fact (nat.prime p)], f p < 1 :=
 begin
@@ -132,6 +136,7 @@ begin
   { exact real.one_le_prod_of_one_le h },
 end
 
+-- (Not sure whether should be in mathlib or not)
 lemma prime_triv_nat_triv (harc : is_nonarchimedean f) (H : ∀ p : ℕ , p.prime → f p = 1) 
   (n : ℕ) (n_pos : n ≠ 0) : f n = 1 :=
 begin

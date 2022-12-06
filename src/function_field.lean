@@ -221,27 +221,125 @@ end
 end adic
 
 -- https://math.stackexchange.com/questions/1748861/does-every-non-archimedean-absolute-value-satisfy-the-ultrametric-inequality/2011734#2011734
-lemma unknown_name2 {R : Type*} [non_assoc_ring R] {f : mul_ring_norm R} :
-  is_nonarchimedean f ↔ (∃ x : R, x ≠ 0 ∧ ∀ n : ℕ, f (n * x) ≤ 1) :=
+
+open filter
+
+lemma Sum_le {R : Type*} [ring R] (f : mul_ring_norm R) (n : ℕ) (ι : ℕ → R) : 
+  f (∑ i in finset.range n, ι i) ≤ ∑ i in finset.range n, f (ι i) :=
+begin
+  induction n with n hn,
+  { simp only [finset.range_zero, finset.sum_empty, map_zero] },
+  { rw finset.sum_range_succ,
+    rw finset.sum_range_succ,
+    calc f (∑ (x : ℕ) in finset.range n, ι x + ι n)
+        ≤ f (∑ i in finset.range n, ι i) + f (ι n) : f.add_le' _ _
+    ... ≤ (∑ i in finset.range n, f (ι i)) + f (ι n) : add_le_add_right hn _ }
+end
+
+lemma is_nonarchimedean_iff_exists_ne_zero_map_nat_mul_le_one {R : Type*} 
+  [comm_ring R] {f : mul_ring_norm R} :
+    is_nonarchimedean f ↔ (∃ x : R, x ≠ 0 ∧ ∀ n : ℕ, f (n * x) ≤ 1) :=
 begin
   split,
-  {sorry},
-  { intros hf y z,
-    obtain ⟨x, hx, hn⟩ := hf,
-    have hn1 : ∀ n : ℕ, f n * f x ≤ 1,
-    {sorry}, clear hn,
-    have hn2 : ∀ n : ℕ, f n ≤ 1 / (f x),
-    {sorry}, clear hn1,
+  { sorry
+    --intros hf,
+    --refine ⟨1, one_ne_zero, _⟩,
+    --intro n,
+    --rw mul_one,
+    --exact is_nonarchimedean.map_nat_cast_le_one hf n 
+  },
+  { intros H y z,
+    obtain ⟨x, hx, hn⟩ := H,
+    have hn1 : ∀ (n : ℕ), f n ≤ 1 / (f x),
+    {sorry},
+    have hyz : ∀ (k : ℕ), f (y + z) ^ k ≤ ((k + 1) / f x) * max (f y) (f z) ^ k,
+    { intro k,
+      rw ← map_pow _ _ _,
+      rw add_pow y z k,
+      apply le_trans (Sum_le f (k + 1) _),
+      have h : ∑ (i : ℕ) in finset.range (k + 1), f (y ^ i * z ^ (k - i) * (k.choose i))
+        ≤ ∑ (i : ℕ) in finset.range (k + 1), (f y) ^ i * (f z) ^ (k - i) / (f x),
+      { apply finset.sum_le_sum,
+        intros i hi,
+        rw [map_mul, map_mul, map_pow,map_pow],
+        specialize hn1 (k.choose i),
+        have hyz : 0 ≤ f y ^ i * f z ^ (k - i),
+        { apply mul_nonneg,
+          { apply pow_nonneg,
+            simp only [map_nonneg] },
+          { apply pow_nonneg,
+            simp only [map_nonneg] } },
+        rw ← mul_one_div,
+        exact (mul_le_mul_of_nonneg_left hn1 hyz) },
+      apply le_trans h,
+      have h1 : ∑ (i : ℕ) in finset.range (k + 1), (f y) ^ i * (f z) ^ (k - i) / (f x)
+        ≤ ∑ (i : ℕ) in finset.range (k + 1), (max (f y) (f z)) ^ k / (f x),
+      { apply finset.sum_le_sum,
+        intros i hi,
+        apply div_le_div_of_le_of_nonneg,
+        { by_cases h : (f y) ≤ (f z),
+          { simp only [h, max_eq_right],
+            calc f y ^ i * f z ^ (k - i) ≤ f z ^ i * f z ^ (k - i) : sorry
+            ...                          = f z ^ (i + k - i) : sorry
+            ...                          = f z ^ k : sorry
+          },
+          {sorry} },
+        {sorry} },
+      apply le_trans h1,
+      rw finset.sum_const ((max (f y) (f z)) ^ k / (f x)),
+      simp only [finset.card_range, nsmul_eq_mul, nat.cast_add, algebra_map.coe_one],
+      field_simp },
+    have hyz1 : ∀ (k : ℕ), k ≠ 0 → 
+      f (y + z) ≤ ((k + 1) / f x) ^ (1 / (k : ℝ)) * max (f y) (f z),
+    { intros k hk,
+      specialize hyz k,
+      refine le_of_pow_le_pow k _ (nat.pos_of_ne_zero hk) _,
+      { apply mul_nonneg,
+        { apply real.rpow_nonneg_of_nonneg,
+          apply div_nonneg,
+          { norm_cast,
+            exact zero_le (k + 1) },
+          { simp only [map_nonneg] } },
+        { by_cases h : (f y) ≤ (f z),
+          { simp only [h, max_eq_right, map_nonneg] },
+          { simp only [le_max_iff, map_nonneg, or_self] }} },
+      { rw mul_pow,
+        nth_rewrite 1 ← real.rpow_nat_cast,
+        rw ← real.rpow_mul _ (1 / (k : ℝ)),
+        { field_simp,
+          rw div_self,
+          { rw real.rpow_one,
+            exact hyz },
+          norm_cast,
+          exact hk },
+        apply div_nonneg,
+        { norm_cast,
+          exact zero_le (k + 1) },
+        { simp only [map_nonneg] } } }, clear hyz,
+    have limit : filter.tendsto (λ n : ℕ, ((n + 1 : ℝ) / (f x)) ^ (1 / (n : ℝ)) 
+      * max (f y) (f z)) filter.at_top (nhds (max (f y) (f z))),
+    { have triv : max (f y) (f z) = 1 * max (f y) (f z) := by rwa one_mul,
+      nth_rewrite 0 triv,
+      apply filter.tendsto.mul_const (max (f y) (f z)),
 
-    sorry}
+      sorry},
+    apply ge_of_tendsto limit _,
+    simp only [filter.eventually_at_top, ge_iff_le],
+    refine ⟨1, _⟩,
+    intros b hb,
+    have hb1 : b ≠ 0 := by linarith,
+    specialize hyz1 b hb1,
+    exact hyz1 }
 end
+
+example (a b c : ℝ) (hc : 0 ≤ c) (hab : a ≤ b) : c * a ≤ c * b := mul_le_mul_of_nonneg_left hab hc
 
 lemma unknown_name1 {K : Type*} [field K] [decidable_eq (ratfunc K)]
   {f : mul_ring_norm (ratfunc K)} (hf_nontriv : f ≠ 1) 
     (hf_triv_K : ∀ {x : K} (hx : x ≠ 0), f (ratfunc.C x) = 1) :
       is_nonarchimedean f :=
 begin
-  rw unknown_name2,
+  rw is_nonarchimedean_iff_exists_ne_zero_map_nat_mul_le_one,
   refine ⟨1, _⟩,
   simp only [ne.def, one_ne_zero, not_false_iff, mul_one, true_and],
   intro n,

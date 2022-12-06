@@ -256,7 +256,10 @@ end
 
 -- This should be the same as `Sum_le`
 lemma Sum_le' (n : ℕ) (ι : finset.Iio n → ℚ) :
-  f (∑ i : finset.Iio n, ι i) ≤ ∑ i : finset.Iio n, f (ι i) := sorry
+  f (∑ i : finset.Iio n, ι i) ≤ ∑ i : finset.Iio n, f (ι i) :=
+begin
+  sorry
+end
 
 --First limit
 lemma limit1 {N : ℝ} (hN : 0 < N) : filter.tendsto (λ n : ℕ, N ^ (1 / (n : ℝ))) filter.at_top (nhds 1) :=
@@ -269,7 +272,7 @@ begin
 end
 
 --Second limit
-lemma limit2 {c : ℝ} (hc : 0 < c) : filter.tendsto (λ n : ℕ, (1 + (n : ℝ)*c)^(1 / (n : ℝ))) filter.at_top (nhds 1) :=
+lemma limit2 (c : ℝ) (hc : 0 < c) : filter.tendsto (λ n : ℕ, (1 + (n : ℝ)*c)^(1 / (n : ℝ))) filter.at_top (nhds 1) :=
 begin
   have cne0 : c ≠ 0 := ne_of_gt hc, 
   have : (λ n : ℕ, (1+(n : ℝ)*c)^(1 / (n : ℝ))) = (λ (x : ℝ), x ^ (1 / ((1 / c) * x  + (- 1) / c))) ∘ (λ y : ℝ, 1 + c*y) ∘ coe,
@@ -309,7 +312,8 @@ begin
     exact ha }
 end 
 
-lemma inter_ineq {n : ℕ} (x y : ℚ) (hf : ∀ m : ℕ, f m ≤ 1) : f (x + y)^(n : ℝ) ≤ (n + 1 : ℝ) * max (f x) (f y)^n :=
+lemma inter_ineq {n : ℕ} (x y : ℚ) (hf : ∀ m : ℕ, f m ≤ 1) : 
+  f (x + y)^(n : ℝ) ≤ (n + 1 : ℝ) * max (f x) (f y)^n :=
 begin
   norm_cast,
   rw [←mul_eq_pow, add_pow],
@@ -345,7 +349,8 @@ begin
       rw [f_mul_eq, f_mul_eq] }
 end
 
-lemma root_ineq {n : ℕ} (x y : ℚ) (hn : n ≠ 0) (hf : ∀ m : ℕ, f m ≤ 1) : f (x + y) ≤ (n + 1 : ℝ) ^ (1 / (n : ℝ)) * max (f x) (f y) :=
+lemma root_ineq {n : ℕ} (x y : ℚ) (hn : n ≠ 0) (hf : ∀ m : ℕ, f m ≤ 1) : 
+  f (x + y) ≤ (n + 1 : ℝ) ^ (1 / (n : ℝ)) * max (f x) (f y) :=
 begin
   refine le_of_pow_le_pow n _ (nat.pos_of_ne_zero hn) _,
   { apply mul_nonneg,
@@ -375,7 +380,7 @@ begin
       suffices goal_1 : (λ k : ℕ, ((k : ℝ) + 1) ^ (1 / (k : ℝ))) = (λ k : ℕ, (1 + (k : ℝ) * 1) ^ (1 / (k : ℝ))),
       { rw goal_1,
         clear goal_1,
-        exact limit2 (real.zero_lt_one) },
+        exact limit2 1 (real.zero_lt_one) },
       { ext k,
         simp,
         rw add_comm } },
