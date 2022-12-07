@@ -252,8 +252,9 @@ begin
     obtain ⟨x, hx, hn⟩ := H,
     have hn1 : ∀ (n : ℕ), f n ≤ 1 / (f x),
     { intro n,
-      
-      sorry},
+      specialize hn n,
+      rw map_mul at hn,
+      rwa le_div_iff (map_pos_of_ne_zero f hx) },
     have hyz : ∀ (k : ℕ), f (y + z) ^ k ≤ ((k + 1) / f x) * max (f y) (f z) ^ k,
     { intro k,
       rw ← map_pow _ _ _,
@@ -358,7 +359,12 @@ begin
     { have triv : max (f y) (f z) = 1 * max (f y) (f z) := by rwa one_mul,
       nth_rewrite 0 triv,
       apply filter.tendsto.mul_const (max (f y) (f z)),
-
+      have hk : (λ (k : ℕ), (((k : ℝ) + 1) / (f x)) ^ (1 / (k : ℝ)))
+         = (λ (k : ℕ), real.exp (real.log ((k : ℝ) + 1 / (f x)) / k)),
+      {sorry},
+      rw hk,
+      refine real.tendsto_exp_nhds_0_nhds_1.comp _,
+      
       sorry},
     apply ge_of_tendsto limit _,
     simp only [filter.eventually_at_top, ge_iff_le],
