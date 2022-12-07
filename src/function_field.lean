@@ -360,12 +360,36 @@ begin
       nth_rewrite 0 triv,
       apply filter.tendsto.mul_const (max (f y) (f z)),
       have hk : (λ (k : ℕ), (((k : ℝ) + 1) / (f x)) ^ (1 / (k : ℝ)))
-         = (λ (k : ℕ), real.exp (real.log ((k : ℝ) + 1 / (f x)) / k)),
-      {sorry},
+         = (λ (k : ℕ), real.exp (real.log (((k : ℝ) + 1) / (f x)) / k)),
+      { ext k,
+        have h : 0 < (((k : ℝ) + 1) / f x),
+        { apply div_pos,
+          { norm_cast,
+            rw ← nat.succ_eq_add_one,
+            exact nat.succ_pos k },
+          { exact map_pos_of_ne_zero f hx } },
+        nth_rewrite 0 ← real.exp_log h,
+        rw ← real.exp_mul,
+        rw mul_one_div },
       rw hk,
       refine real.tendsto_exp_nhds_0_nhds_1.comp _,
-      
-      sorry},
+      have hk₁ : (λ (k : ℕ), real.log (((k : ℝ) + 1) / (f x)) / k)
+       = (λ (k : ℕ), (real.log ((k : ℝ) + 1) / k - real.log (f x) / k)),
+      { ext k,
+        rw real.log_div,
+        { rwa sub_div },
+        { norm_cast,
+          rw ← nat.succ_eq_add_one,
+          exact nat.succ_ne_zero k },
+        {sorry} },--rwa map_ne_zero f
+      rw hk₁,
+      have goal1 : tendsto (λ k : ℕ, (real.log ((k : ℝ) + 1) / k)) at_top (nhds 0),
+      { 
+        sorry},
+      have goal2 : tendsto (λ k : ℕ, (real.log (f x) / k)) at_top (nhds 0),
+      { exact tendsto_const_div_at_top_nhds_0_nat (real.log (f x)) },
+      have goal := filter.tendsto.sub goal1 goal2,
+      rwa zero_sub_zero at goal },
     apply ge_of_tendsto limit _,
     simp only [filter.eventually_at_top, ge_iff_le],
     refine ⟨1, _⟩,
@@ -374,8 +398,6 @@ begin
     specialize hyz1 b hb1,
     exact hyz1 }
 end
-
-example (a b c : ℝ) (hc : 0 ≤ c) (hab : a ≤ b) : c * a ≤ c * b := mul_le_mul_of_nonneg_left hab hc
 
 lemma unknown_name1 {K : Type*} [field K] [decidable_eq (ratfunc K)]
   {f : mul_ring_norm (ratfunc K)} (hf_nontriv : f ≠ 1) 
