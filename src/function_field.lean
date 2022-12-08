@@ -384,8 +384,43 @@ begin
         {sorry} },--rwa map_ne_zero f
       rw hk₁,
       have goal1 : tendsto (λ k : ℕ, (real.log ((k : ℝ) + 1) / k)) at_top (nhds 0),
-      { 
-        sorry},
+      { have h₁ : tendsto (λ (k : ℕ), real.log (↑k + 1) / (↑k + 1)) at_top (nhds 0),
+        { have h₂ := real.tendsto_pow_log_div_mul_add_at_top 1 0 1 (by linarith),
+          ring_nf at h₂,
+          suffices : tendsto (λ (k : ℕ),
+            real.log (↑(k + 1) : ℝ) / (↑(k + 1) : ℝ)) at_top (nhds 0),
+          { simpa },
+          rw @tendsto_add_at_top_iff_nat _ (λ k, (real.log (k : ℝ)) / (k : ℝ)) _ 1,
+          suffices goal : tendsto (λ (k : ℝ), (real.log k) / k) at_top (nhds 0),
+          { exact goal.comp tendsto_coe_nat_at_top_at_top },
+          exact h₂ },
+        have h₂ : tendsto (λ (k : ℕ), ((k : ℝ) + 1) / k) at_top (nhds 1),
+        { have h₃ : (λ (k : ℕ), ((k : ℝ) + 1) / k) = (λ (k : ℕ), 
+            (k : ℝ) / k + (k : ℝ)⁻¹),
+          { ext k,
+            rw add_div,
+            rw one_div },
+          rw h₃, clear h₃,
+          suffices goal : tendsto (λ (k : ℕ), (k : ℝ) / k) at_top (nhds 1) ∧
+            tendsto (λ (k : ℕ), (k : ℝ)⁻¹) at_top (nhds 0),
+          { have goal1 := filter.tendsto.add goal.1 goal.2,
+            rwa add_zero at goal1 },
+          split,
+          { have h : ∀ (k : ℕ), k ≥ 1 → (k : ℝ) / k = 1,
+            { intros k hk,
+              rw div_self,
+              norm_cast,
+              linarith },
+            exact tendsto_at_top_of_eventually_const h },
+          { exact tendsto_inverse_at_top_nhds_0_nat } },
+        have goal := filter.tendsto.mul h₁ h₂,
+        simp only [zero_mul] at goal,
+        convert goal,
+        ext x,
+        have hx₁ : (x : ℝ) + 1 ≠ 0,
+        { norm_cast,
+          exact nat.add_one_ne_zero x },
+        rwa div_mul_div_cancel (real.log (↑x + 1)) hx₁ },
       have goal2 : tendsto (λ k : ℕ, (real.log (f x) / k)) at_top (nhds 0),
       { exact tendsto_const_div_at_top_nhds_0_nat (real.log (f x)) },
       have goal := filter.tendsto.sub goal1 goal2,
@@ -397,6 +432,12 @@ begin
     have hb1 : b ≠ 0 := by linarith,
     specialize hyz1 b hb1,
     exact hyz1 }
+end
+
+example (a b c d : ℝ) (hb : b ≠ 0) (hc : c ≠ 0) (ha : a ≠ 0) : 
+  (a / b) * (b / c) = a / c :=
+begin
+  exact div_mul_div_cancel a hb,
 end
 
 lemma unknown_name1 {K : Type*} [field K] [decidable_eq (ratfunc K)]
