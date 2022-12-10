@@ -3,17 +3,18 @@ Copyright (c) 2022 María Inés de Frutos-Fernández. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: María Inés de Frutos-Fernández
 -/
-import number_theory.padics.padic_norm
 import basic
-import order.filter.basic
-import analysis.special_functions.log.base
-import analysis.normed.ring.seminorm
-import data.nat.digits
 import mul_ring_norm_rat
 import nonarchimedean
-import ring_theory.power_series.basic
-import analysis.specific_limits.normed
-import topology.algebra.order.basic
+import function_field
+--import number_theory.padics.padic_norm
+--import order.filter.basic
+--import analysis.special_functions.log.base
+--import analysis.normed.ring.seminorm
+--import data.nat.digits
+--import ring_theory.power_series.basic
+--import analysis.specific_limits.normed
+--import topology.algebra.order.basic
 
 open_locale big_operators
 
@@ -73,10 +74,6 @@ end
 end padic
 
 variable {f : mul_ring_norm ℚ}
-
--- This lemma is missing in the mathlib I think.
-lemma mul_ring_norm.neg {R : Type*} [non_assoc_ring R] {f : mul_ring_norm R} 
-  (a : R) : f (-a) = f a := f.neg' a
 
 section non_archimedean
 
@@ -242,17 +239,6 @@ end
 end non_archimedean
 
 section archimedean
---Sum inequality
-lemma Sum_le (n : ℕ) (ι : ℕ → ℚ) : f (∑ i in finset.range n, ι i) ≤ ∑ i in finset.range n, f (ι i) :=
-begin
-  induction n with n hn,
-  { simp only [finset.range_zero, finset.sum_empty, map_zero] },
-  { rw finset.sum_range_succ,
-    rw finset.sum_range_succ,
-    calc f (∑ (x : ℕ) in finset.range n, ι x + ι n)
-        ≤ f (∑ i in finset.range n, ι i) + f (ι n) : f.add_le' _ _
-    ... ≤ (∑ i in finset.range n, f (ι i)) + f (ι n) : add_le_add_right hn _ }
-end
 
 -- This should be the same as `Sum_le`
 lemma Sum_le' (n : ℕ) (ι : finset.Iio n → ℚ) :
@@ -317,7 +303,7 @@ lemma inter_ineq {n : ℕ} (x y : ℚ) (hf : ∀ m : ℕ, f m ≤ 1) :
 begin
   norm_cast,
   rw [←mul_eq_pow, add_pow],
-  apply le_trans (Sum_le (n + 1) _),
+  apply le_trans (Sum_le f (n + 1)),
   suffices goal_1 : ∑ i in finset.range (n + 1), f ( x^i * y^(n - i) * (n.choose i) )
     = ∑ i in finset.range (n + 1), f (x ^ i) * f(y ^ (n - i)) * f (n.choose i),
   { rw goal_1,
@@ -725,7 +711,7 @@ begin
           { simp only [int.cast_neg_succ_of_nat, nat.cast_add, algebra_map.coe_one,
               neg_add_rev],
             rw ←abs_neg,
-            rw ←mul_ring_norm.neg,
+            rw ←map_neg_eq_map,
             simp only [neg_add_rev, neg_neg],
             norm_cast,
             exact (h₃ (b + 1)).symm } },

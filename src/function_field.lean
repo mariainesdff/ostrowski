@@ -200,7 +200,7 @@ end adic
 open filter
 
 -- Done in PR17863
-lemma Sum_le {R : Type*} [ring R] (f : mul_ring_norm R) (n : ℕ) (ι : ℕ → R) : 
+lemma Sum_le {R : Type*} [ring R] (f : mul_ring_norm R) (n : ℕ) {ι : ℕ → R} : 
   f (∑ i in finset.range n, ι i) ≤ ∑ i in finset.range n, f (ι i) := sorry
 
 -- Done in PR17863
@@ -263,7 +263,7 @@ begin
 end
 
 /-- Ostrowski's Theorem -/
-theorem rat_ring_norm_p_adic_or_real (K : Type*) [field K] [decidable_eq (ratfunc K)]
+theorem rat_ring_norm_p_adic_or_real' (K : Type*) [field K] [decidable_eq (ratfunc K)]
   (c : ℝ) (hc_pos : 0 < c) (hc_one_lt : 1 < c) (f : mul_ring_norm (ratfunc K))
     (hf_nontriv : f ≠ 1) (hf_triv_K : ∀ {x : K} (hx : x ≠ 0), f (ratfunc.C x) = 1) :
       (mul_ring_norm.equiv f (mul_ring_norm.infty K c hc_pos hc_one_lt)) ∨
