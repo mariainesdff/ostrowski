@@ -195,250 +195,18 @@ begin
       { sorry } } }
 end
 
-lemma mul_ring_norm.is_nonarchimedaen_eq_max_of_neq {R : Type*} [non_assoc_ring R] 
-  {f : mul_ring_norm R} (hf : is_nonarchimedean f) {r s : R} (h_neq : f r ≠ f s) : 
-    f (r + s) = max (f r) (f s) :=
-begin
-  have hf₁ := hf,
-  specialize hf r s,
-  cases ne.lt_or_lt h_neq with h₁ h₂,
-  { specialize hf₁ (r + s) (-r),
-    simp only [add_neg_cancel_comm, map_neg_eq_map, le_max_iff] at hf₁,
-    cases hf₁ with h₃ h₄,
-    { have hrs : f r ≤ f s := by linarith,
-      rw max_eq_right hrs at hf ⊢,
-      linarith },
-    { linarith } },
-  { specialize hf₁ (r + s) (-s),
-    simp only [add_neg_cancel_right, map_neg_eq_map, le_max_iff] at hf₁,
-    cases hf₁ with h₃ h₄,
-    { have hrs : f s ≤ f r := by linarith,
-      rw max_eq_left hrs at hf ⊢,
-      linarith },
-    { linarith } }
-end
-
 end adic
-
--- https://math.stackexchange.com/questions/1748861/does-every-non-archimedean-absolute-value-satisfy-the-ultrametric-inequality/2011734#2011734
 
 open filter
 
+-- Done in PR17863
 lemma Sum_le {R : Type*} [ring R] (f : mul_ring_norm R) (n : ℕ) (ι : ℕ → R) : 
-  f (∑ i in finset.range n, ι i) ≤ ∑ i in finset.range n, f (ι i) :=
-begin
-  induction n with n hn,
-  { simp only [finset.range_zero, finset.sum_empty, map_zero] },
-  { rw finset.sum_range_succ,
-    rw finset.sum_range_succ,
-    calc f (∑ (x : ℕ) in finset.range n, ι x + ι n)
-        ≤ f (∑ i in finset.range n, ι i) + f (ι n) : f.add_le' _ _
-    ... ≤ (∑ i in finset.range n, f (ι i)) + f (ι n) : add_le_add_right hn _ }
-end
+  f (∑ i in finset.range n, ι i) ≤ ∑ i in finset.range n, f (ι i) := sorry
 
+-- Done in PR17863
 lemma is_nonarchimedean_iff_exists_ne_zero_map_nat_mul_le_one {R : Type*} 
   [comm_ring R] {f : mul_ring_norm R} :
-    is_nonarchimedean f ↔ (∃ x : R, x ≠ 0 ∧ ∀ n : ℕ, f (n * x) ≤ 1) :=
-begin
-  split,
-  { sorry
-    --intros hf,
-    --refine ⟨1, one_ne_zero, _⟩,
-    --intro n,
-    --rw mul_one,
-    --exact is_nonarchimedean.map_nat_cast_le_one hf n 
-  },
-  { intros H y z,
-    obtain ⟨x, hx, hn⟩ := H,
-    have hn1 : ∀ (n : ℕ), f n ≤ 1 / (f x),
-    { intro n,
-      specialize hn n,
-      rw map_mul at hn,
-      rwa le_div_iff (map_pos_of_ne_zero f hx) },
-    have hyz : ∀ (k : ℕ), f (y + z) ^ k ≤ ((k + 1) / f x) * max (f y) (f z) ^ k,
-    { intro k,
-      rw ← map_pow _ _ _,
-      rw add_pow y z k,
-      apply le_trans (Sum_le f (k + 1) _),
-      have h : ∑ (i : ℕ) in finset.range (k + 1), f (y ^ i * z ^ (k - i) * (k.choose i))
-        ≤ ∑ (i : ℕ) in finset.range (k + 1), (f y) ^ i * (f z) ^ (k - i) / (f x),
-      { apply finset.sum_le_sum,
-        intros i hi,
-        rw [map_mul, map_mul, map_pow,map_pow],
-        specialize hn1 (k.choose i),
-        have hyz : 0 ≤ f y ^ i * f z ^ (k - i),
-        { apply mul_nonneg,
-          { apply pow_nonneg,
-            simp only [map_nonneg] },
-          { apply pow_nonneg,
-            simp only [map_nonneg] } },
-        rw ← mul_one_div,
-        exact (mul_le_mul_of_nonneg_left hn1 hyz) },
-      apply le_trans h,
-      have h1 : ∑ (i : ℕ) in finset.range (k + 1), (f y) ^ i * (f z) ^ (k - i) / (f x)
-        ≤ ∑ (i : ℕ) in finset.range (k + 1), (max (f y) (f z)) ^ k / (f x),
-      { apply finset.sum_le_sum,
-        intros i hi,
-        apply div_le_div_of_le_of_nonneg,
-        { by_cases hyz : (f y) ≤ (f z),
-          { simp only [hyz, max_eq_right],
-            calc f y ^ i * f z ^ (k - i) ≤ f z ^ i * f z ^ (k - i) : 
-              begin 
-                apply mul_le_mul_of_nonneg_right,
-                { apply pow_le_pow_of_le_left,
-                  { simp only [map_nonneg] },
-                  { exact hyz } },
-                { apply pow_nonneg,
-                  simp only [map_nonneg] }
-              end
-            ...                          = f z ^ k :
-              begin
-                rw ← pow_add,
-                congr,
-                simp only [finset.mem_range] at hi,
-                have hi₁ : i ≤ k := by linarith,
-                zify,
-                ring,
-              end
-          },
-          { have h₁ : f z ≤ f y := by linarith,
-            rw max_eq_left h₁,
-            calc f y ^ i * f z ^ (k - i) ≤ f y ^ i * f y ^ (k - i) : 
-              begin
-                apply mul_le_mul_of_nonneg_left,
-                { apply pow_le_pow_of_le_left,
-                  { simp only [map_nonneg] },
-                  { exact h₁ } },
-                { apply pow_nonneg,
-                  simp only [map_nonneg]}
-              end
-            ...                          = f y ^ k :
-              begin
-                rw ← pow_add,
-                congr,
-                simp only [finset.mem_range] at hi,
-                have hi₁ : i ≤ k := by linarith,
-                zify,
-                ring,
-              end
-          } },
-        { simp only [map_nonneg] } },
-      apply le_trans h1,
-      rw finset.sum_const ((max (f y) (f z)) ^ k / (f x)),
-      simp only [finset.card_range, nsmul_eq_mul, nat.cast_add, algebra_map.coe_one],
-      field_simp },
-    have hyz1 : ∀ (k : ℕ), k ≠ 0 → 
-      f (y + z) ≤ ((k + 1) / f x) ^ (1 / (k : ℝ)) * max (f y) (f z),
-    { intros k hk,
-      specialize hyz k,
-      refine le_of_pow_le_pow k _ (nat.pos_of_ne_zero hk) _,
-      { apply mul_nonneg,
-        { apply real.rpow_nonneg_of_nonneg,
-          apply div_nonneg,
-          { norm_cast,
-            exact zero_le (k + 1) },
-          { simp only [map_nonneg] } },
-        { by_cases h : (f y) ≤ (f z),
-          { simp only [h, max_eq_right, map_nonneg] },
-          { simp only [le_max_iff, map_nonneg, or_self] }} },
-      { rw mul_pow,
-        nth_rewrite 1 ← real.rpow_nat_cast,
-        rw ← real.rpow_mul _ (1 / (k : ℝ)),
-        { field_simp,
-          rw div_self,
-          { rw real.rpow_one,
-            exact hyz },
-          norm_cast,
-          exact hk },
-        apply div_nonneg,
-        { norm_cast,
-          exact zero_le (k + 1) },
-        { simp only [map_nonneg] } } }, clear hyz,
-    have limit : filter.tendsto (λ n : ℕ, ((n + 1 : ℝ) / (f x)) ^ (1 / (n : ℝ)) 
-      * max (f y) (f z)) filter.at_top (nhds (max (f y) (f z))),
-    { have triv : max (f y) (f z) = 1 * max (f y) (f z) := by rwa one_mul,
-      nth_rewrite 0 triv,
-      apply filter.tendsto.mul_const (max (f y) (f z)),
-      have hk : (λ (k : ℕ), (((k : ℝ) + 1) / (f x)) ^ (1 / (k : ℝ)))
-         = (λ (k : ℕ), real.exp (real.log (((k : ℝ) + 1) / (f x)) / k)),
-      { ext k,
-        have h : 0 < (((k : ℝ) + 1) / f x),
-        { apply div_pos,
-          { norm_cast,
-            rw ← nat.succ_eq_add_one,
-            exact nat.succ_pos k },
-          { exact map_pos_of_ne_zero f hx } },
-        nth_rewrite 0 ← real.exp_log h,
-        rw ← real.exp_mul,
-        rw mul_one_div },
-      rw hk,
-      refine real.tendsto_exp_nhds_0_nhds_1.comp _,
-      have hk₁ : (λ (k : ℕ), real.log (((k : ℝ) + 1) / (f x)) / k)
-       = (λ (k : ℕ), (real.log ((k : ℝ) + 1) / k - real.log (f x) / k)),
-      { ext k,
-        rw real.log_div,
-        { rwa sub_div },
-        { norm_cast,
-          rw ← nat.succ_eq_add_one,
-          exact nat.succ_ne_zero k },
-        {sorry} },--rwa map_ne_zero f
-      rw hk₁,
-      have goal1 : tendsto (λ k : ℕ, (real.log ((k : ℝ) + 1) / k)) at_top (nhds 0),
-      { have h₁ : tendsto (λ (k : ℕ), real.log (↑k + 1) / (↑k + 1)) at_top (nhds 0),
-        { have h₂ := real.tendsto_pow_log_div_mul_add_at_top 1 0 1 (by linarith),
-          ring_nf at h₂,
-          suffices : tendsto (λ (k : ℕ),
-            real.log (↑(k + 1) : ℝ) / (↑(k + 1) : ℝ)) at_top (nhds 0),
-          { simpa },
-          rw @tendsto_add_at_top_iff_nat _ (λ k, (real.log (k : ℝ)) / (k : ℝ)) _ 1,
-          suffices goal : tendsto (λ (k : ℝ), (real.log k) / k) at_top (nhds 0),
-          { exact goal.comp tendsto_coe_nat_at_top_at_top },
-          exact h₂ },
-        have h₂ : tendsto (λ (k : ℕ), ((k : ℝ) + 1) / k) at_top (nhds 1),
-        { have h₃ : (λ (k : ℕ), ((k : ℝ) + 1) / k) = (λ (k : ℕ), 
-            (k : ℝ) / k + (k : ℝ)⁻¹),
-          { ext k,
-            rw add_div,
-            rw one_div },
-          rw h₃, clear h₃,
-          suffices goal : tendsto (λ (k : ℕ), (k : ℝ) / k) at_top (nhds 1) ∧
-            tendsto (λ (k : ℕ), (k : ℝ)⁻¹) at_top (nhds 0),
-          { have goal1 := filter.tendsto.add goal.1 goal.2,
-            rwa add_zero at goal1 },
-          split,
-          { have h : ∀ (k : ℕ), k ≥ 1 → (k : ℝ) / k = 1,
-            { intros k hk,
-              rw div_self,
-              norm_cast,
-              linarith },
-            exact tendsto_at_top_of_eventually_const h },
-          { exact tendsto_inverse_at_top_nhds_0_nat } },
-        have goal := filter.tendsto.mul h₁ h₂,
-        simp only [zero_mul] at goal,
-        convert goal,
-        ext x,
-        have hx₁ : (x : ℝ) + 1 ≠ 0,
-        { norm_cast,
-          exact nat.add_one_ne_zero x },
-        rwa div_mul_div_cancel (real.log (↑x + 1)) hx₁ },
-      have goal2 : tendsto (λ k : ℕ, (real.log (f x) / k)) at_top (nhds 0),
-      { exact tendsto_const_div_at_top_nhds_0_nat (real.log (f x)) },
-      have goal := filter.tendsto.sub goal1 goal2,
-      rwa zero_sub_zero at goal },
-    apply ge_of_tendsto limit _,
-    simp only [filter.eventually_at_top, ge_iff_le],
-    refine ⟨1, _⟩,
-    intros b hb,
-    have hb1 : b ≠ 0 := by linarith,
-    specialize hyz1 b hb1,
-    exact hyz1 }
-end
-
-example (a b c d : ℝ) (hb : b ≠ 0) (hc : c ≠ 0) (ha : a ≠ 0) : 
-  (a / b) * (b / c) = a / c :=
-begin
-  exact div_mul_div_cancel a hb,
-end
+    is_nonarchimedean f ↔ (∃ x : R, x ≠ 0 ∧ ∀ n : ℕ, f (n * x) ≤ 1) := sorry
 
 lemma unknown_name1 {K : Type*} [field K] [decidable_eq (ratfunc K)]
   {f : mul_ring_norm (ratfunc K)} (hf_nontriv : f ≠ 1) 
@@ -461,6 +229,29 @@ begin
   { specialize hf_triv_K h,
     rw hn1 at hf_triv_K,
     rw hf_triv_K }
+end
+
+lemma mul_ring_norm.is_nonarchimedaen_eq_max_of_neq {R : Type*} [non_assoc_ring R] 
+  {f : mul_ring_norm R} (hf : is_nonarchimedean f) {r s : R} (h_neq : f r ≠ f s) : 
+    f (r + s) = max (f r) (f s) :=
+begin
+  have hf₁ := hf,
+  specialize hf r s,
+  cases ne.lt_or_lt h_neq with h₁ h₂,
+  { specialize hf₁ (r + s) (-r),
+    simp only [add_neg_cancel_comm, map_neg_eq_map, le_max_iff] at hf₁,
+    cases hf₁ with h₃ h₄,
+    { have hrs : f r ≤ f s := by linarith,
+      rw max_eq_right hrs at hf ⊢,
+      linarith },
+    { linarith } },
+  { specialize hf₁ (r + s) (-s),
+    simp only [add_neg_cancel_right, map_neg_eq_map, le_max_iff] at hf₁,
+    cases hf₁ with h₃ h₄,
+    { have hrs : f s ≤ f r := by linarith,
+      rw max_eq_left hrs at hf ⊢,
+      linarith },
+    { linarith } }
 end
 
 lemma unknown_name {R : Type*} [non_assoc_ring R] {f : mul_ring_norm R} 
