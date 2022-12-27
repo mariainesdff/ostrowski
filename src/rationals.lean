@@ -445,9 +445,8 @@ begin
     { have hn₀ := nat.find_spec hf,
       rw ←dn₀ at hn₀,
       exact lt_trans zero_lt_one hn₀ } },
-  have hα : 0 ≤ α,
+  have hα : 0 < α,
   { rw dα,
-    apply le_of_lt,
     apply div_pos,
     { apply real.log_pos,
       rw dn₀,
@@ -456,15 +455,23 @@ begin
       norm_cast,
       exact aux1 hf dn₀ } },
   let C : ℝ := ((n₀ : ℝ) ^ α) / ((n₀ : ℝ) ^ α - 1),
-  have hC : 0 ≤ C,
-  {sorry}, -- easy to do
+  have dc : C = ((n₀ : ℝ) ^ α) / ((n₀ : ℝ) ^ α - 1) := rfl,
+  have hC : 0 < C,
+  { rw dc,
+    rw ← this,
+    have hn₀ := nat.find_spec hf,
+    rw ←dn₀ at hn₀,
+    apply div_pos; linarith, }, -- easy to do
   suffices : ∀ n : ℕ, f n ≤ C * ((n : ℝ) ^ α),
   { intro n,
     have limit' : filter.tendsto (λ N : ℕ, C ^ (1 / (N : ℝ))) filter.at_top (nhds 1),
-    {sorry}, --someone good at analysis
+    { exact limit1 hC, }, --someone good at analysis
     have limit'' : filter.tendsto 
       (λ N : ℕ, (C ^ (1 / (N : ℝ))) * (n ^ α)) filter.at_top (nhds (n ^ α)),
-    {sorry}, --following from limit'
+    { have := filter.tendsto.mul_const (↑n ^ α) limit',
+      simp at this,
+      simp,
+      exact this, }, --following from limit'
     have stupid : (0 : ℝ) ≤ n := by norm_cast; exact zero_le n, -- very easy
     have aux : ∀ N : ℕ, (f (n)) ^ (N : ℝ) ≤ C * ((n ^ α) ^ (N : ℝ)),
     { intro N,
@@ -476,9 +483,28 @@ begin
       specialize this (n ^ N),
       norm_cast,
       exact this, },
-    have aux1 : ∀ N : ℕ, f (n) ≤ (C ^ (1 / (N : ℝ))) * (n ^ α),
-    {sorry},  --take nth root on both side
-    exact ge_of_tendsto' limit'' aux1 },
+    have aux1 : ∀ N : ℕ, 0 < N → f (n) ≤ (C ^ (1 / (N : ℝ))) * (n ^ α),
+    { intros N hN,
+      refine le_of_pow_le_pow N _ hN _,
+      { apply mul_nonneg,
+        { apply le_of_lt,
+          exact real.rpow_pos_of_pos hC _, },
+        { exact real.rpow_nonneg_of_nonneg stupid _, } },
+      { rw mul_pow,
+        repeat {rw [←real.rpow_nat_cast]},
+        rw [←real.rpow_mul (le_of_lt hC), one_div],
+        have : (N : ℝ) ≠ 0,
+        { norm_cast,
+          rw push_neg.not_eq,
+          exact ne_of_gt hN, },
+        rw [inv_mul_cancel this, real.rpow_one],
+        exact aux N, } },  --take nth root on both side
+    apply ge_of_tendsto limit'' _,
+    simp only [filter.eventually_at_top, ge_iff_le],
+    use 1,
+    intros b hb,
+    have : 0 < b := (by linarith),
+    exact aux1 b this, },
   intro n,
   by_cases n = 0,
   { subst h,
@@ -566,7 +592,7 @@ begin
     rw mul_comm,
     rw real.rpow_mul stupid,
     have stupid2 : 0 ≤ (n₀ : ℝ) ^ (((n₀.digits n).length : ℝ) - 1) := sorry, --easy
-    exact real.rpow_le_rpow stupid2 goal hα },
+    exact real.rpow_le_rpow stupid2 goal (le_of_lt hα) },
   { congr',
     ext,
     rw [f_mul_eq, mul_eq_pow] }
