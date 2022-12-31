@@ -625,8 +625,11 @@ begin
   {sorry}, -- should be easy `digits_ne_nil_iff_ne_zero` might be useful
   have h₁ : f ((n₀ : ℚ) ^ ((n₀.digits n).length)) 
     - f (((n₀ : ℚ) ^ ((n₀.digits n).length)) - n) ≤ f n,
-  { 
-    sorry},
+  { have goal := abs_sub_map_le_sub f ((n₀ : ℚ) ^ ((n₀.digits n).length)) (((n₀ : ℚ) ^ ((n₀.digits n).length)) - n),
+    simp only [map_pow, sub_sub_cancel] at goal,
+    apply le_trans _ goal,
+    rw map_pow,
+    exact le_abs_self _ },
   apply le_trans' h₁,
   rw [mul_eq_pow, this],
   have h := aux2 hf dn₀ dα,
