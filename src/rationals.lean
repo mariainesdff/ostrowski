@@ -622,7 +622,10 @@ begin
   {sorry}, -- This should be almost the same as above
   intros n hn,
   have length_lt_one : 1 ≤ (n₀.digits n).length,
-  {sorry}, -- should be easy `digits_ne_nil_iff_ne_zero` might be useful
+  { by_contra goal,
+    simp only [not_le, nat.lt_one_iff] at goal,
+    rw [list.length_eq_zero, nat.digits_eq_nil_iff_eq_zero] at goal,
+    contradiction },
   have h₁ : f ((n₀ : ℚ) ^ ((n₀.digits n).length)) 
     - f (((n₀ : ℚ) ^ ((n₀.digits n).length)) - n) ≤ f n,
   { have goal := abs_sub_map_le_sub f ((n₀ : ℚ) ^ ((n₀.digits n).length)) (((n₀ : ℚ) ^ ((n₀.digits n).length)) - n),
