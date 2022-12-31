@@ -613,6 +613,7 @@ begin
     { apply real.log_pos,
       norm_cast,
       exact aux1 hf dn₀ } },
+  have hn₀ : 2 ≤ n₀ := by linarith [aux1 hf dn₀],
   have : f n₀ = n₀ ^ α := sorry, -- same proof as above
   let C : ℝ := (1 - (1 - 1 / n₀) ^ α),
   have hC : 0 ≤ C,
@@ -637,7 +638,16 @@ begin
   simp only [rat.cast_sub, rat.cast_pow, rat.cast_coe_nat],
   have h₃ : ((n₀ : ℝ) ^ α) ^ (n₀.digits n).length - ((n₀ : ℝ) ^ (n₀.digits n).length - (n₀ : ℝ) ^ ((n₀.digits n).length - 1)) ^ α ≤
     ((n₀ : ℝ) ^ α) ^ (n₀.digits n).length - ((n₀ : ℝ) ^ (n₀.digits n).length - (n : ℝ)) ^ α,
-  {sorry},
+  { rw sub_le_sub_iff_left,
+    apply real.rpow_le_rpow _ _ hα,
+    { field_simp,
+      norm_cast,
+      linarith [@nat.lt_base_pow_length_digits n₀ n hn₀] },
+    { field_simp,
+      norm_cast,
+      have goal := nat.base_pow_length_digits_le n₀ n hn₀ hn,
+
+      sorry} },
   apply le_trans' h₃,
   clear h₃,
   have h₄ : ((n₀ : ℝ) ^ α) ^ (n₀.digits n).length - 
@@ -688,14 +698,15 @@ begin
       exact nat.zero_le n₀ },
     norm_cast,
     exact nat.zero_le n₀ },
-  have aux' : 2 ≤ n₀ := by linarith [aux1 hf dn₀],
   apply real.rpow_le_rpow,
   { norm_cast,
     exact nat.zero_le n },
   { norm_cast,
-    linarith [@nat.lt_base_pow_length_digits _ n aux'] },
+    linarith [@nat.lt_base_pow_length_digits _ n hn₀] },
   { exact hα }
 end
+
+#exit
 
 lemma archimedean_case (hf : ¬ is_nonarchimedean f) : mul_ring_norm.equiv f mul_ring_norm.real :=
 begin
