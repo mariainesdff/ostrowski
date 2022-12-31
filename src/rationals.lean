@@ -625,15 +625,19 @@ begin
   {sorry}, -- should be easy `digits_ne_nil_iff_ne_zero` might be useful
   have h₁ : f ((n₀ : ℚ) ^ ((n₀.digits n).length)) 
     - f (((n₀ : ℚ) ^ ((n₀.digits n).length)) - n) ≤ f n,
-  {sorry},
+  { 
+    sorry},
   apply le_trans' h₁,
   rw [mul_eq_pow, this],
   have h := aux2 hf dn₀ dα,
   specialize h ((n₀ ^ ((n₀.digits n).length)) - n),
+  have hn₁ : n ≤ n₀ ^ (n₀.digits n).length := by linarith [@nat.lt_base_pow_length_digits n₀ n hn₀],
   have h₂ : ((n₀ : ℝ) ^ α) ^ (n₀.digits n).length - ((n₀ ^ (n₀.digits n).length - n) : ℚ) ^ α ≤
   ((n₀ : ℝ) ^ α) ^ (n₀.digits n).length - f ((n₀ : ℚ) ^ (n₀.digits n).length - (n : ℚ)),
-  { 
-    sorry},
+  { rw sub_le_sub_iff_left,
+    push_cast at h,
+    simp only [rat.cast_sub, rat.cast_pow, rat.cast_coe_nat],
+    exact h },
   apply le_trans' h₂,
   clear h₂,
   simp only [rat.cast_sub, rat.cast_pow, rat.cast_coe_nat],
@@ -643,7 +647,7 @@ begin
     apply real.rpow_le_rpow _ _ hα,
     { field_simp,
       norm_cast,
-      linarith [@nat.lt_base_pow_length_digits n₀ n hn₀] },
+      exact hn₁ },
     { field_simp,
       norm_cast,
       rw ← nat.pow_div length_lt_one,
