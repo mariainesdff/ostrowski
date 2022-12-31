@@ -621,7 +621,7 @@ begin
   suffices : ∀ n : ℕ, n ≠ 0 → C * ((n : ℝ) ^ α) ≤ f n, -- It seems to me that we need n ≠ 0 here.
   {sorry}, -- This should be almost the same as above
   intros n hn,
-  have length_lt_one : 1 ≤ (n₀.digits n).length, -- Not sure whether this is useful or not
+  have length_lt_one : 1 ≤ (n₀.digits n).length,
   {sorry}, -- should be easy `digits_ne_nil_iff_ne_zero` might be useful
   have h₁ : f ((n₀ : ℚ) ^ ((n₀.digits n).length)) 
     - f (((n₀ : ℚ) ^ ((n₀.digits n).length)) - n) ≤ f n,
@@ -632,7 +632,8 @@ begin
   specialize h ((n₀ ^ ((n₀.digits n).length)) - n),
   have h₂ : ((n₀ : ℝ) ^ α) ^ (n₀.digits n).length - ((n₀ ^ (n₀.digits n).length - n) : ℚ) ^ α ≤
   ((n₀ : ℝ) ^ α) ^ (n₀.digits n).length - f ((n₀ : ℚ) ^ (n₀.digits n).length - (n : ℚ)),
-  {sorry},
+  { 
+    sorry},
   apply le_trans' h₂,
   clear h₂,
   simp only [rat.cast_sub, rat.cast_pow, rat.cast_coe_nat],
@@ -645,9 +646,10 @@ begin
       linarith [@nat.lt_base_pow_length_digits n₀ n hn₀] },
     { field_simp,
       norm_cast,
-      have goal := nat.base_pow_length_digits_le n₀ n hn₀ hn,
-
-      sorry} },
+      rw ← nat.pow_div length_lt_one,
+      { simp only [pow_one],
+        exact nat.div_le_of_le_mul (nat.base_pow_length_digits_le n₀ n hn₀ hn) },
+      linarith } },
   apply le_trans' h₃,
   clear h₃,
   have h₄ : ((n₀ : ℝ) ^ α) ^ (n₀.digits n).length - 
