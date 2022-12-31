@@ -603,9 +603,8 @@ lemma aux3 {n₀ : ℕ} {α : ℝ} (hf : ∃ n : ℕ, 1 < f n)
   (dn₀ : n₀ = nat.find hf) (dα : α = real.log (f n₀) / real.log n₀) : 
     ∀ n : ℕ, (n ^ α : ℝ) ≤ f n :=
 begin
-  have hα : 0 ≤ α,
+  have hα₀ : 0 < α,
   { rw dα,
-    apply le_of_lt,
     apply div_pos,
     { apply real.log_pos,
       rw dn₀,
@@ -613,14 +612,28 @@ begin
     { apply real.log_pos,
       norm_cast,
       exact aux1 hf dn₀ } },
+  have hα : 0 ≤ α := by linarith,
   have hn₀ : 2 ≤ n₀ := by linarith [aux1 hf dn₀],
   have : f n₀ = n₀ ^ α := sorry, -- same proof as above
   let C : ℝ := (1 - (1 - 1 / n₀) ^ α),
   have hC : 0 ≤ C,
-  {sorry}, -- Maybe useful later and easy to do
-  suffices : ∀ n : ℕ, n ≠ 0 → C * ((n : ℝ) ^ α) ≤ f n, -- It seems to me that we need n ≠ 0 here.
+  { dsimp only [C],
+    field_simp,
+    apply real.rpow_le_one _ _ hα,
+    { field_simp,
+      
+      sorry},
+    {
+      sorry} },
+  suffices : ∀ n : ℕ, C * ((n : ℝ) ^ α) ≤ f n,
   {sorry}, -- This should be almost the same as above
-  intros n hn,
+  intros n,
+  by_cases hn : n = 0,
+  { subst hn,
+    simp only [map_zero, algebra_map.coe_zero, map_zero],
+    rw real.zero_rpow,
+    { rw mul_zero },
+    linarith },
   have length_lt_one : 1 ≤ (n₀.digits n).length,
   { by_contra goal,
     simp only [not_le, nat.lt_one_iff] at goal,
