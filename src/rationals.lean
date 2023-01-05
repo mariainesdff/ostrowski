@@ -731,8 +731,6 @@ begin
   { exact hα }
 end
 
-#exit
-
 lemma archimedean_case (hf : ¬ is_nonarchimedean f) : mul_ring_norm.equiv f mul_ring_norm.real :=
 begin
   rw ←non_archimedean_iff_nat_norm_bound at hf,
