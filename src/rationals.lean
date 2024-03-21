@@ -274,6 +274,7 @@ begin
     apply filter.tendsto.const_mul_at_top hc,
     intros x hx,
     exact hx },
+  
   exact this.comp tendsto_coe_nat_at_top_at_top
 end
 
@@ -330,6 +331,7 @@ begin
               linarith },
             conv { to_rhs, rw ←this },
             repeat { rw mul_eq_pow },
+            
             exact pow_mul_pow_le_max_pow (map_nonneg f x) (map_nonneg f y),
           end
     ... = ↑(n + 1) * max (f x) (f y) ^ n : by simp, },
@@ -402,7 +404,8 @@ lemma list.map_with_index_append' {α M : Type*} [add_comm_monoid M]
 begin
   induction K with a J IH generalizing f,
   { simp },
-  { simp [IH (λ i, f (i+1)), add_assoc], }
+  { simp only [IH (fun (i : 4._.42), (f ((frozen_name has_add.add) i 1))), add_assoc, list.length, list.cons_append,
+  list.map_with_index_cons, eq_self_iff_true, and_self], }
 end
 
 -- This should be the same as `list.map_with_index_sum_to_finset_sum`
