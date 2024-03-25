@@ -221,8 +221,7 @@ begin
   },
   cases hp,
   exact (nat.cast_pos.mpr hp.pos),
-  norm_cast,
-  exact rat.denom_ne_zero a,
+  norm_cast,  exact rat.denom_ne_zero a,
 end
 
 -- Finish: hence f and padic are equivalent
@@ -404,8 +403,7 @@ lemma list.map_with_index_append' {α M : Type*} [add_comm_monoid M]
 begin
   induction K with a J IH generalizing f,
   { simp },
-  { simp only [IH (fun (i : 4._.42), (f ((frozen_name has_add.add) i 1))), add_assoc, list.length, list.cons_append,
-  list.map_with_index_cons, eq_self_iff_true, and_self], }
+  { simp [IH (λ i, f (i+1)), add_assoc], }
 end
 
 -- This should be the same as `list.map_with_index_sum_to_finset_sum`
@@ -423,7 +421,8 @@ begin
   apply list.reverse_rec_on L, -- the induction principle which works best
   { simp, },
   { intros M a IH,
-    simp [list.map_with_index_append, IH],
+    simp only [list.map_with_index_append, IH, list.map_with_index_cons, zero_add, list.map_with_index_nil, list.sum_append,
+  list.sum_cons, list.sum_nil, add_zero, list.length_append, list.length_singleton],
     rw finset.sum_range_succ,
     congr' 1,
     { apply finset.sum_congr rfl,
@@ -433,7 +432,7 @@ begin
       rw list.nth_append hx, },
     { simp, } },
 end
-
+#check summable
 -- This is lemma 1.1
 lemma aux2 {n₀ : ℕ} {α : ℝ} (hf : ∃ n : ℕ, 1 < f n) 
   (dn₀ : n₀ = nat.find hf) (dα : α = real.log (f n₀) / real.log n₀) : 
